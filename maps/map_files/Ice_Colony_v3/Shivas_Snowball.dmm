@@ -5652,7 +5652,7 @@
 "aMZ" = (
 /obj/structure/machinery/power/port_gen/pacman,
 /obj/structure/machinery/light/small{
-	dir = 4
+	dir = 8
 	},
 /turf/open/auto_turf/snow/layer1,
 /area/shiva/exterior/cp_s_research)
@@ -24178,9 +24178,9 @@
 /area/shiva/exterior/junkyard)
 "tJX" = (
 /obj/structure/closet/secure_closet/engineering_personal,
-/obj/item/weapon/gun/smg/pps43,
-/obj/item/ammo_magazine/smg/pps43,
-/obj/item/ammo_magazine/smg/pps43,
+/obj/item/weapon/gun/smg/ppsh,
+/obj/item/ammo_magazine/smg/ppsh,
+/obj/item/ammo_magazine/smg/ppsh,
 /turf/open/floor/shiva{
 	dir = 1
 	},
@@ -24854,9 +24854,6 @@
 	dir = 1
 	},
 /area/shiva/interior/colony/medseceng)
-"ukJ" = (
-/turf/open/floor/shiva,
-/area/shiva/interior/colony/research_hab)
 "ukU" = (
 /obj/structure/surface/table,
 /obj/item/clipboard,
@@ -27086,9 +27083,9 @@
 "wOf" = (
 /obj/structure/closet/secure_closet/engineering_personal,
 /obj/structure/machinery/light/double,
-/obj/item/weapon/gun/smg/pps43,
-/obj/item/ammo_magazine/smg/pps43,
-/obj/item/ammo_magazine/smg/pps43,
+/obj/item/weapon/gun/smg/ppsh,
+/obj/item/ammo_magazine/smg/ppsh,
+/obj/item/ammo_magazine/smg/ppsh,
 /turf/open/floor/shiva{
 	dir = 1
 	},
@@ -36780,7 +36777,7 @@ tRq
 chU
 ogu
 rZt
-ukJ
+rZt
 asz
 asz
 qNE
