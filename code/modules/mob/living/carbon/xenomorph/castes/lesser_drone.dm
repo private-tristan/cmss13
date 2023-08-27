@@ -11,7 +11,7 @@
 	xeno_explosion_resistance = XENO_NO_EXPLOSIVE_ARMOR
 	armor_deflection = XENO_NO_ARMOR
 	evasion = XENO_EVASION_LOW
-	speed = XENO_SPEED_TIER_6
+	speed = XENO_SPEED_TIER_4
 
 	evolution_allowed = FALSE
 	can_be_revived = FALSE
@@ -56,12 +56,11 @@
 	refunds_larva_if_banished = FALSE
 	crit_health = 0
 	gib_chance = 100
-	acid_blood_damage = 15
+	acid_blood_damage = 10
 	base_actions = list(
 		/datum/action/xeno_action/onclick/xeno_resting,
 		/datum/action/xeno_action/onclick/regurgitate,
 		/datum/action/xeno_action/watch_xeno,
-		/datum/action/xeno_action/activable/tail_stab,
 		/datum/action/xeno_action/activable/corrosive_acid/weak,
 		/datum/action/xeno_action/onclick/emit_pheromones,
 		/datum/action/xeno_action/onclick/plant_weeds/lesser, //first macro
