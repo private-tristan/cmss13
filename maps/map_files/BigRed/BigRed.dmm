@@ -4782,7 +4782,6 @@
 	dir = 1
 	},
 /obj/effect/landmark/monkey_spawn,
-/obj/effect/landmark/structure_spawner/setup/distress/xeno_weed_node,
 /turf/open/floor/plating{
 	dir = 1;
 	icon_state = "warnplate"
