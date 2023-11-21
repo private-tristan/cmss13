@@ -753,10 +753,10 @@
 /datum/chem_property/positive/fire/oxidizing
 	name = PROPERTY_OXIDIZING
 	code = "OXI"
-	description = "The chemical is oxidizing, increasing the intensity of chemical fires. However, the fuel is also burned slightly faster because of it."
+	description = "The chemical is oxidizing, increasing the intensity of chemical fires. However, the fuel is also burned slightly faster because of it. corvus"
 	rarity = PROPERTY_COMMON
 	value = 1
-	intensity_per_level = 6
+	intensity_per_level = 10
 	duration_per_level = -2
 
 	intensitymod_per_level = 0.2
