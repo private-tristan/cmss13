@@ -745,9 +745,6 @@
 		if(!ismob(M))
 			to_chat(usr, "This can only be used on instances of type /mob")
 			return
-		if(isAI(M))
-			to_chat(usr, "This cannot be used on instances of type /mob/living/silicon/ai")
-			return
 
 		for(var/obj/item/I in M)
 			M.drop_inv_item_on_ground(I)
@@ -768,9 +765,6 @@
 		var/mob/M = locate(href_list["tdome2"])
 		if(!ismob(M))
 			to_chat(usr, "This can only be used on instances of type /mob")
-			return
-		if(isAI(M))
-			to_chat(usr, "This cannot be used on instances of type /mob/living/silicon/ai")
 			return
 
 		for(var/obj/item/I in M)
@@ -793,9 +787,6 @@
 		if(!ismob(M))
 			to_chat(usr, "This can only be used on instances of type /mob")
 			return
-		if(isAI(M))
-			to_chat(usr, "This cannot be used on instances of type /mob/living/silicon/ai")
-			return
 
 		M.apply_effect(5, PARALYZE)
 		sleep(5)
@@ -813,9 +804,6 @@
 		var/mob/M = locate(href_list["tdomeobserve"])
 		if(!ismob(M))
 			to_chat(usr, "This can only be used on instances of type /mob")
-			return
-		if(isAI(M))
-			to_chat(usr, "This cannot be used on instances of type /mob/living/silicon/ai")
 			return
 
 		for(var/obj/item/I in M)
@@ -853,17 +841,6 @@
 			return
 
 		usr.client.cmd_admin_alienize(H)
-
-	else if(href_list["makeai"])
-		if(!check_rights(R_SPAWN)) return
-
-		var/mob/living/carbon/human/H = locate(href_list["makeai"])
-		if(!istype(H))
-			to_chat(usr, "This can only be used on instances of type /mob/living/carbon/human")
-			return
-
-		message_admins(SPAN_DANGER("Admin [key_name_admin(usr)] AIized [key_name_admin(H)]!"), 1)
-		H.AIize()
 
 	else if(href_list["changehivenumber"])
 		if(!check_rights(R_DEBUG|R_ADMIN)) return
@@ -917,28 +894,13 @@
 				qdel(M.skills)
 			M.skills = null //no skill restriction
 
-			if(is_alien_whitelisted(M,"Yautja Elder"))
-				M.change_real_name(M, "Elder [y_name]")
-				H.equip_to_slot_or_del(new /obj/item/clothing/suit/armor/yautja/hunter/full(H), WEAR_JACKET)
-				H.equip_to_slot_or_del(new /obj/item/weapon/twohanded/yautja/glaive(H), WEAR_L_HAND)
-			else
-				M.change_real_name(M, y_name)
+			M.change_real_name(M, y_name)
 			M.name = "Unknown" // Yautja names are not visible for oomans
 
 			if(H)
 				qdel(H) //May have to clear up round-end vars and such....
 
 		return
-
-	else if(href_list["makerobot"])
-		if(!check_rights(R_SPAWN)) return
-
-		var/mob/living/carbon/human/H = locate(href_list["makerobot"])
-		if(!istype(H))
-			to_chat(usr, "This can only be used on instances of type /mob/living/carbon/human")
-			return
-
-		usr.client.cmd_admin_robotize(H)
 
 	else if(href_list["makeanimal"])
 		if(!check_rights(R_SPAWN)) return
@@ -1782,19 +1744,19 @@
 		var/mob/ref_person = locate(href_list["nukeapprove"])
 		if(!istype(ref_person))
 			return FALSE
-		var/nuketype = "Encrypted Operational Nuke"
+		var/nukename = "Encrypted Operational Nuke"
 		var/prompt = tgui_alert(usr, "Do you want the nuke to be Encrypted?", "Nuke Type", list("Encrypted", "Decrypted"), 20 SECONDS)
 		if(prompt == "Decrypted")
-			nuketype = "Decrypted Operational Nuke"
-		prompt = tgui_alert(usr, "Are you sure you want to authorize \a [nuketype] to the marines? This will greatly affect the round!", "DEFCON 1", list("No", "Yes"))
+			nukename = "Decrypted Operational Nuke"
+		prompt = tgui_alert(usr, "Are you sure you want to authorize '[nukename]' to the marines? This will greatly affect the round!", "DEFCON 1", list("No", "Yes"))
 		if(prompt != "Yes")
 			return
 
+		var/nuketype = GLOB.supply_packs_types[nukename]
 		//make ASRS order for nuke
 		var/datum/supply_order/new_order = new()
-		new_order.ordernum = GLOB.supply_controller.ordernum
-		GLOB.supply_controller.ordernum++
-		new_order.object = GLOB.supply_controller.supply_packs[nuketype]
+		new_order.ordernum = GLOB.supply_controller.ordernum++
+		new_order.object = GLOB.supply_packs_datums[nuketype]
 		new_order.orderedby = ref_person
 		new_order.approvedby = "USCM High Command"
 		GLOB.supply_controller.shoppinglist += new_order

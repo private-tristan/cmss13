@@ -13,7 +13,7 @@
 #define SIMULATION_STAGE_BEGIN 6
 
 /obj/structure/machinery/chem_simulator
-	name = "Synthesis Simulator"
+	name = "synthesis simulator"
 	desc = "This computer uses advanced algorithms to perform simulations of reagent properties, for the purpose of calculating the synthesis required to make a new variant."
 	icon = 'icons/obj/structures/machinery/science_machines_64x32.dmi'
 	icon_state = "modifier"
@@ -87,10 +87,10 @@
 			to_chat(user, SPAN_WARNING("Chemical data already inserted."))
 			return
 	else
-		to_chat(user, SPAN_WARNING("The [src] refuses the [B]."))
+		to_chat(user, SPAN_WARNING("[src] refuses [B]."))
 		return
 	user.drop_inv_item_to_loc(B, src)
-	to_chat(user, SPAN_NOTICE("You insert [B] into the [src]."))
+	to_chat(user, SPAN_NOTICE("You insert [B] into [src]."))
 	flick("[icon_state]_reading",src)
 	update_costs()
 	SSnano.nanomanager.update_uis(src) // update all UIs attached to src
@@ -443,7 +443,7 @@
 	for(var/datum/chem_property/P in creation_template)
 		creation_cost += max(abs(P.value), 1) * P.level
 		if(P.level > 5) // a penalty is added at each level above 5 (+1 at 6, +2 at 7, +4 at 8, +5 at 9, +7 at 10)
-			creation_cost += P.level - 6 + n_ceil((P.level - 5) / 2)
+			creation_cost += P.level - 6 + Ceiling((P.level - 5) / 2)
 	creation_cost += ((new_od_level - 10) / 5) * 3 //3 cost for every 5 units above 10
 	for(var/rarity in creation_complexity)
 		switch(rarity)

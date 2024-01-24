@@ -60,6 +60,10 @@
 	icon_xeno = 'icons/mob/xenos/facehugger.dmi'
 	icon_xenonid = 'icons/mob/xenonids/facehugger.dmi'
 
+	weed_food_icon = 'icons/mob/xenos/weeds_48x48.dmi'
+	weed_food_states = list("Facehugger_1","Facehugger_2","Facehugger_3")
+	weed_food_states_flipped = list("Facehugger_1","Facehugger_2","Facehugger_3")
+
 /mob/living/carbon/xenomorph/facehugger/initialize_pass_flags(datum/pass_flags_container/PF)
 	..()
 	if (PF)
@@ -154,6 +158,9 @@
 /mob/living/carbon/xenomorph/facehugger/proc/handle_hug(mob/living/carbon/human/human)
 	var/obj/item/clothing/mask/facehugger/hugger = new /obj/item/clothing/mask/facehugger(loc, hivenumber)
 	var/did_hug = hugger.attach(human, TRUE, 1, src)
+	if(!did_hug)
+		qdel(hugger)
+		return
 	if(client)
 		client.player_data?.adjust_stat(PLAYER_STAT_FACEHUGS, STAT_CATEGORY_XENO, 1)
 	qdel(src)
@@ -213,7 +220,13 @@
 	return
 
 /mob/living/carbon/xenomorph/facehugger/emote(act, m_type, message, intentional, force_silence)
+	// Custom emote
+	if(act == "me")
+		return ..()
+
+	// Otherwise, ""roar""!
 	playsound(loc, "alien_roar_larva", 15)
+	return TRUE
 
 /mob/living/carbon/xenomorph/facehugger/get_status_tab_items()
 	. = ..()

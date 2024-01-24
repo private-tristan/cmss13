@@ -493,7 +493,7 @@ As sniper rifles have both and weapon mods can change them as well. ..() deals w
 
 	unwield(user)
 	pull_time = world.time + wield_delay
-	if(user.dazed)
+	if(HAS_TRAIT(user, TRAIT_DAZED))
 		pull_time += 3
 	guaranteed_delay_time = world.time + WEAPON_GUARANTEED_DELAY
 
@@ -759,7 +759,7 @@ As sniper rifles have both and weapon mods can change them as well. ..() deals w
 	slowdown = initial(slowdown) + aim_slowdown
 	place_offhand(user, initial(name))
 	wield_time = world.time + wield_delay
-	if(user.dazed)
+	if(HAS_TRAIT(user, TRAIT_DAZED))
 		wield_time += 5
 	guaranteed_delay_time = world.time + WEAPON_GUARANTEED_DELAY
 	//slower or faster wield delay depending on skill.
@@ -843,6 +843,7 @@ User can be passed as null, (a gun reloading itself for instance), so we need to
 				to_chat(user, SPAN_WARNING("Your reload was interrupted!"))
 				return
 		replace_magazine(user, magazine)
+		SEND_SIGNAL(user, COMSIG_MOB_RELOADED_GUN, src)
 	else
 		current_mag = magazine
 		magazine.forceMove(src)
@@ -1048,6 +1049,7 @@ and you're good to go.
 						user.swap_hand()
 					unload(user, TRUE, drop_to_ground) // We want to quickly autoeject the magazine. This proc does the rest based on magazine type. User can be passed as null.
 					playsound(src, empty_sound, 25, 1)
+					SEND_SIGNAL(user, COMSIG_MOB_GUN_EMPTY, src)
 		else // Just fired a chambered bullet with no magazine in the gun
 			update_icon()
 
@@ -1538,6 +1540,7 @@ not all weapons use normal magazines etc. load_into_chamber() itself is designed
 
 		if(flags_gun_features & GUN_TRIGGER_SAFETY)
 			to_chat(user, SPAN_WARNING("The safety is on!"))
+			gun_user.balloon_alert(gun_user, "safety on")
 			return
 		if(active_attachable)
 			if(active_attachable.flags_attach_features & ATTACH_PROJECTILE)
@@ -1933,8 +1936,8 @@ not all weapons use normal magazines etc. load_into_chamber() itself is designed
 
 	if(gun_user.client?.prefs?.toggle_prefs & TOGGLE_HELP_INTENT_SAFETY && (gun_user.a_intent == INTENT_HELP))
 		if(world.time % 3) // Limits how often this message pops up, saw this somewhere else and thought it was clever
-			//Absolutely SCREAM this at people so they don't get killed by it
-			to_chat(gun_user, SPAN_HIGHDANGER("Help intent safety is on! Switch to another intent to fire your weapon."))
+			to_chat(gun_user, SPAN_DANGER("Help intent safety is on! Switch to another intent to fire your weapon."))
+			gun_user.balloon_alert(gun_user, "help intent safety")
 			click_empty(gun_user)
 		return FALSE
 

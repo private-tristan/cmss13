@@ -8549,6 +8549,12 @@
 	},
 /turf/open/auto_turf/sand/layer0,
 /area/kutjevo/interior/colony_north)
+"lBu" = (
+/obj/structure/machinery/power/terminal{
+	dir = 4
+	},
+/turf/open/floor/kutjevo/multi_tiles,
+/area/kutjevo/interior/power)
 "lBP" = (
 /obj/structure/window/framed/kutjevo/reinforced,
 /obj/structure/machinery/door/poddoor/shutters/almayer{
@@ -14599,7 +14605,6 @@
 /area/kutjevo/interior/power)
 "tEV" = (
 /obj/structure/surface/rack,
-/obj/item/book/manual/engineering_particle_accelerator,
 /obj/effect/landmark/objective_landmark/medium,
 /turf/open/floor/kutjevo/multi_tiles{
 	dir = 10
@@ -20100,8 +20105,8 @@ wGH
 cWV
 exI
 nbV
-nbV
 umo
+nbV
 nbV
 nbV
 lAI
@@ -21172,8 +21177,8 @@ sVF
 xBm
 wvX
 hzN
-hzN
 wqk
+hzN
 hzN
 hzN
 ppX
@@ -21770,8 +21775,8 @@ wGH
 cWV
 uhO
 bbc
-nbV
 umo
+nbV
 nbV
 nbV
 lAI
@@ -22842,8 +22847,8 @@ oJE
 xBm
 saK
 hzN
-hzN
 wqk
+hzN
 hzN
 hzN
 ppX
@@ -25968,7 +25973,7 @@ uGd
 fkP
 vin
 pBV
-hQj
+lBu
 uBz
 cvm
 hQj
@@ -26135,7 +26140,7 @@ eyU
 dyU
 pyp
 pyp
-hQj
+sNp
 pyp
 xjY
 xjY
