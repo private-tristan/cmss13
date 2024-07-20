@@ -132,6 +132,12 @@
 		if(SShijack.sd_unlocked)
 			. += "Self Destruct Status: [SShijack.get_sd_eta()]"
 
+	for(var/list/player as anything in SShorde_mode.current_players)
+		if(player["mob"] == src)
+			. += "Points: [player["points"]]"
+			. += "Wave: [SShorde_mode.round]"
+			break
+
 /mob/living/carbon/human/ex_act(severity, direction, datum/cause_data/cause_data)
 	if(body_position == LYING_DOWN)
 		severity *= EXPLOSION_PRONE_MULTIPLIER

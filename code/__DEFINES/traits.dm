@@ -238,6 +238,9 @@
 /// If the mob won't drop items held in face slot when downed
 #define TRAIT_IRON_TEETH "t_iron_teeth"
 
+// -- horde mode perks --
+#define TRAIT_PERK_JUGGERNAUT "t_p_juggernaut"
+
 // -- ability traits --
 /// Xenos with this trait cannot have plasma transfered to them
 #define TRAIT_ABILITY_NO_PLASMA_TRANSFER "t_ability_no_plasma_transfer"

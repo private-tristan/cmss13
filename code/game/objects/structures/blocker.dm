@@ -135,3 +135,8 @@
 	desc = "It is a machine that pumps fuel around the ship."
 	invisibility = 101
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+
+
+/obj/structure/blocker/forcefield/horde_mode
+	is_whitelist = TRUE
+	types = list(/mob/living/simple_animal/hostile/alien/horde_mode)

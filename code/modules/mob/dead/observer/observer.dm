@@ -1013,6 +1013,38 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	msg_admin_niche("[key_name(usr)] has joined as a [Z].")
 
 
+/mob/dead/verb/join_horde_mode()
+	set category = "Ghost.Join"
+	set name = "Join Horde Mode"
+	set desc = "Select a freed mob by staff."
+
+	if(SSticker.current_state < GAME_STATE_PLAYING || !SSticker.mode)
+		to_chat(src, SPAN_WARNING("The game hasn't started yet!"))
+		return
+
+	var/mob/player = src
+	if(!player.stat || !player.mind)
+		return
+
+	for(var/num_of_spawns in SShorde_mode.marine_spawns)
+		player.close_spawn_windows()
+		var/spawn_loc = SAFEPICK(SShorde_mode.marine_spawns)
+		var/mob/living/carbon/human/spawned_marine = new(spawn_loc)
+
+		spawned_marine.lastarea = get_area(spawn_loc)
+
+		player.client.prefs.copy_all_to(spawned_marine, JOB_MARINE, TRUE, TRUE)
+		arm_equipment(spawned_marine, /datum/equipment_preset/uscm/horde_mode_marine, FALSE, TRUE)
+
+		SShorde_mode.current_players += list(list("mob" = spawned_marine, "points" = 500))
+
+		player.mind.transfer_to(spawned_marine, TRUE)
+
+		INVOKE_ASYNC(spawned_marine, TYPE_PROC_REF(/mob/living/carbon/human, regenerate_icons))
+		INVOKE_ASYNC(spawned_marine, TYPE_PROC_REF(/mob/living/carbon/human, update_body), 1, 0)
+		INVOKE_ASYNC(spawned_marine, TYPE_PROC_REF(/mob/living/carbon/human, update_hair))
+		break
+
 /mob/dead/verb/join_as_freed_mob()
 	set category = "Ghost.Join"
 	set name = "Join as Freed Mob"
