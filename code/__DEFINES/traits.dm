@@ -240,6 +240,8 @@
 
 // -- horde mode perks --
 #define TRAIT_PERK_JUGGERNAUT "t_p_juggernaut"
+#define TRAIT_PERK_SPEED "t_p_speed"
+#define TRAIT_PERK_EXPLOSIVE_RESISTANCE "t_p_explosive_resistance"
 
 // -- ability traits --
 /// Xenos with this trait cannot have plasma transfered to them

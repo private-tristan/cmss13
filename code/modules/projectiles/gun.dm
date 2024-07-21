@@ -121,6 +121,8 @@
 	var/extra_delay = 0
 	///When PB burst firing and handing off to /fire after a target moves out of range, this is how many bullets have been fired.
 	var/PB_burst_bullets_fired = 0
+	///Was the PB fired yet or no?
+	var/PB_fired = FALSE
 
 	// Full auto
 	///Whether or not the gun is firing full-auto
@@ -1260,6 +1262,7 @@ and you're good to go.
 	if(!(flags_gun_features & GUN_CAN_POINTBLANK)) // If it can't point blank, you can't suicide and such.
 		return ..()
 
+	PB_fired = FALSE
 	if(attacked_mob == user && user.zone_selected == "mouth" && ishuman(user))
 		var/mob/living/carbon/human/HM = user
 		if(!able_to_fire(user))
@@ -1419,6 +1422,7 @@ and you're good to go.
 		SEND_SIGNAL(projectile_to_fire, COMSIG_BULLET_USER_EFFECTS, user)
 		SEND_SIGNAL(user, COMSIG_BULLET_DIRECT_HIT, attacked_mob)
 		simulate_recoil(1, user)
+		PB_fired = TRUE
 
 		if(projectile_to_fire.ammo.bonus_projectiles_amount)
 			var/obj/projectile/BP

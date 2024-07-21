@@ -58,6 +58,8 @@
 
 	mobility_flags = MOBILITY_FLAGS_LYING_CAPABLE_DEFAULT
 
+	var/melee_damage_multiplier = 1
+
 /mob/living/simple_animal/Initialize()
 	. = ..()
 	SSmob.living_misc_mobs += src

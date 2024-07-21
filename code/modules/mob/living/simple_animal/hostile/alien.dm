@@ -136,7 +136,7 @@
 		roar_emote()
 
 /mob/living/simple_animal/hostile/alien/proc/roar_emote()
-	visible_message("<B>The [name]</B> roars!")
+	visible_message("<B>[name]</B> roars!")
 	playsound(loc, "alien_roar", 40)
 
 /mob/living/simple_animal/hostile/alien/death(cause, gibbed, deathmessage = "lets out a waning guttural screech, green blood bubbling from its maw. The caustic acid starts melting the body away...")

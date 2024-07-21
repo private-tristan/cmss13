@@ -39,6 +39,10 @@
 	//and display them
 	add_to_all_mob_huds()
 
+/mob/living/carbon/human/Initialize(mapload, new_species)
+	. = ..()
+	register_human_init_signals()
+
 /mob/living/carbon/human/initialize_pain()
 	if(species)
 		return species.initialize_pain(src)
@@ -134,15 +138,24 @@
 
 	for(var/list/player as anything in SShorde_mode.current_players)
 		if(player["mob"] == src)
+			var/list/perk_list = list()
+			if(HAS_TRAIT(src, TRAIT_PERK_JUGGERNAUT))
+				. += "Juggernaut"
+			if(HAS_TRAIT(src, TRAIT_PERK_SPEED))
+				. += "Speed"
 			. += "Points: [player["points"]]"
 			. += "Wave: [SShorde_mode.round]"
+			if(length(perk_list))
+				var/perk_list_text = english_list(perk_list)
+				. += "Perks: [perk_list_text]"
+
 			break
 
 /mob/living/carbon/human/ex_act(severity, direction, datum/cause_data/cause_data)
 	if(body_position == LYING_DOWN)
 		severity *= EXPLOSION_PRONE_MULTIPLIER
-
-
+	if(HAS_TRAIT(src, TRAIT_PERK_EXPLOSIVE_RESISTANCE))
+		severity *= 0.10
 
 	var/b_loss = 0
 	var/f_loss = 0
@@ -162,33 +175,34 @@
 		create_shrapnel(oldloc, rand(5, 9), direction, 45, /datum/ammo/bullet/shrapnel/light/human/var2, last_damage_data)
 		return
 
-	if(!HAS_TRAIT(src, TRAIT_EAR_PROTECTION))
+	if(!HAS_TRAIT(src, TRAIT_EAR_PROTECTION) || !HAS_TRAIT(src, TRAIT_PERK_EXPLOSIVE_RESISTANCE))
 		ear_damage += severity * 0.15
 		AdjustEarDeafness(severity * 0.5)
 
 	/// Reduces effects by armor value.
 	var/bomb_armor_mult = ((CLOTHING_ARMOR_HARDCORE - bomb_armor) * 0.01)
 
-	if(severity >= 30)
-		flash_eyes(flash_timer = 4 SECONDS * bomb_armor_mult)
+	if(!HAS_TRAIT(src, TRAIT_PERK_EXPLOSIVE_RESISTANCE))
+		if(severity >= 30)
+			flash_eyes(flash_timer = 4 SECONDS * bomb_armor_mult)
 
-	// Stuns are multiplied by 1 reduced by their medium armor value. So a medium of 30 would mean a 30% reduction.
-	var/knockdown_value = severity * 0.1
-	var/knockdown_minus_armor = min(knockdown_value * bomb_armor_mult, 1 SECONDS)
-	var/obj/item/item1 = get_active_hand()
-	var/obj/item/item2 = get_inactive_hand()
-	apply_effect(floor(knockdown_minus_armor), WEAKEN)
-	apply_effect(floor(knockdown_minus_armor), STUN) // Remove this to let people crawl after an explosion. Funny but perhaps not desirable.
-	var/knockout_value = damage * 0.1
-	var/knockout_minus_armor = min(knockout_value * bomb_armor_mult * 0.5, 0.5 SECONDS) // the KO time is halved from the knockdown timer. basically same stun time, you just spend less time KO'd.
-	apply_effect(floor(knockout_minus_armor), PARALYZE)
-	apply_effect(floor(knockout_minus_armor) * 2, DAZE)
-	explosion_throw(severity, direction)
+		// Stuns are multiplied by 1 reduced by their medium armor value. So a medium of 30 would mean a 30% reduction.
+		var/knockdown_value = severity * 0.1
+		var/knockdown_minus_armor = min(knockdown_value * bomb_armor_mult, 1 SECONDS)
+		var/obj/item/item1 = get_active_hand()
+		var/obj/item/item2 = get_inactive_hand()
+		apply_effect(floor(knockdown_minus_armor), WEAKEN)
+		apply_effect(floor(knockdown_minus_armor), STUN) // Remove this to let people crawl after an explosion. Funny but perhaps not desirable.
+		var/knockout_value = damage * 0.1
+		var/knockout_minus_armor = min(knockout_value * bomb_armor_mult * 0.5, 0.5 SECONDS) // the KO time is halved from the knockdown timer. basically same stun time, you just spend less time KO'd.
+		apply_effect(floor(knockout_minus_armor), PARALYZE)
+		apply_effect(floor(knockout_minus_armor) * 2, DAZE)
+		explosion_throw(severity, direction)
 
-	if(item1 && isturf(item1.loc))
-		item1.explosion_throw(severity, direction)
-	if(item2 && isturf(item2.loc))
-		item2.explosion_throw(severity, direction)
+		if(item1 && isturf(item1.loc))
+			item1.explosion_throw(severity, direction)
+		if(item2 && isturf(item2.loc))
+			item2.explosion_throw(severity, direction)
 
 	if(damage >= 0)
 		b_loss += damage * 0.5

@@ -26,7 +26,7 @@ SUBSYSTEM_DEF(horde_mode)
 		return
 
 	if(!amount_to_spawn && !length(current_xenos) && !round_ended)
-		COOLDOWN_START(src, round_cooldown, 12 SECONDS)
+		COOLDOWN_START(src, round_cooldown, (12 + round) SECONDS)
 		round_ended = TRUE
 		send_player_message(SPAN_HIGHDANGER("Seems like the horde has died down... Take a breather and ready yourself for the next one."))
 
@@ -58,7 +58,6 @@ SUBSYSTEM_DEF(horde_mode)
 	for(var/list/player_in_list as anything in current_players)
 		var/player_mob = player_in_list["mob"]
 		to_chat(player_mob, message)
-
 
 /datum/controller/subsystem/horde_mode/proc/handle_purchase(mob/living/player_mob, cost)
 	for(var/list/player as anything in current_players)

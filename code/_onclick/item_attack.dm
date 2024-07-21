@@ -102,6 +102,9 @@
 			power = armor_damage_reduction(GLOB.xeno_melee, power, X.armor_deflection + X.armor_deflection_buff - X.armor_deflection_debuff, 20, 0, 0, X.armor_integrity)
 			var/armor_punch = armor_break_calculation(GLOB.xeno_melee, power, X.armor_deflection + X.armor_deflection_buff - X.armor_deflection_debuff, 20, 0, 0, X.armor_integrity)
 			X.apply_armorbreak(armor_punch)
+		if(isanimal(M))
+			var/mob/living/simple_animal/animal = M
+			power = power * animal.melee_damage_multiplier
 		if(hitsound)
 			playsound(loc, hitsound, 25, 1)
 		switch(damtype)
