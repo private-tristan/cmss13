@@ -554,6 +554,9 @@
 		to_chat(usr, SPAN_NOTICE("[icon2html(src, usr)] You pick up \the [src], registering yourself as its owner."))
 	..()
 
+/obj/item/weapon/gun/rifle/m46c/mk1_ammo
+	current_mag = /obj/item/ammo_magazine/rifle/m41aMK1
+
 //---ability actions--\\
 
 /datum/action/item_action/m46c/action_activate()

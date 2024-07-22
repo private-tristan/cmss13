@@ -1695,7 +1695,8 @@
 		INVOKE_ASYNC(src, PROC_REF(dizzy_process))
 
 /proc/setup_human(mob/living/carbon/human/target, mob/new_player/new_player, is_late_join = FALSE)
-	new_player.spawning = TRUE
+	if(isnewplayer(new_player))
+		new_player.spawning = TRUE
 	new_player.close_spawn_windows()
 	new_player.client.prefs.copy_all_to(target, new_player.job, is_late_join)
 

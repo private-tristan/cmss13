@@ -12,24 +12,12 @@
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("You heartbeat seems stronger."))
 	species.total_health += 75
-	pain.threshold_mild += 15
-	pain.threshold_discomforting += 15
-	pain.threshold_moderate += 15
-	pain.threshold_distressing += 15
-	pain.threshold_severe += 15
-	pain.threshold_horrible += 15
 	skills.set_skill(SKILL_ENDURANCE, skills.get_skill_level(SKILL_ENDURANCE) + 2)
 
 /mob/living/carbon/human/proc/on_perk_juggernaut_loss(datum/source)
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("Your heartbeat seems weaker."))
 	species.total_health = initial(species.total_health)
-	pain.threshold_mild = initial(pain.threshold_mild)
-	pain.threshold_discomforting = initial(pain.threshold_discomforting)
-	pain.threshold_moderate = initial(pain.threshold_moderate)
-	pain.threshold_distressing = initial(pain.threshold_distressing)
-	pain.threshold_severe = initial(pain.threshold_severe)
-	pain.threshold_horrible = initial(pain.threshold_horrible)
 	skills.set_skill(SKILL_ENDURANCE, skills.get_skill_level(SKILL_ENDURANCE) - 2)
 
 /mob/living/carbon/human/proc/on_perk_speed_gain(datum/source)

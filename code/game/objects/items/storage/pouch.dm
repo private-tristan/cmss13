@@ -222,6 +222,12 @@
 	new /obj/item/storage/pill_bottle/packet/tramadol(src)
 	new /obj/item/storage/pill_bottle/packet/tramadol(src)
 
+/obj/item/storage/pouch/firstaid/horde_mode/fill_preset_inventory()
+	new /obj/item/reagent_container/hypospray/autoinjector/keloderm(src)
+	new /obj/item/reagent_container/hypospray/autoinjector/merabicard(src)
+	new /obj/item/stack/medical/splint(src)
+	new /obj/item/stack/medical/bruise_pack(src)
+
 /obj/item/storage/pouch/firstaid/ert
 	desc = "It can contain autoinjectors, ointments, and bandages. This one has some extra stuff."
 	icon_state = "firstaid"

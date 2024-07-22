@@ -1022,27 +1022,30 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 		to_chat(src, SPAN_WARNING("The game hasn't started yet!"))
 		return
 
-	var/mob/player = src
+	var/mob/new_player/player = src
 	if(!player.stat || !player.mind)
 		return
 
 	for(var/num_of_spawns in SShorde_mode.marine_spawns)
-		player.close_spawn_windows()
 		var/spawn_loc = SAFEPICK(SShorde_mode.marine_spawns)
 		var/mob/living/carbon/human/spawned_marine = new(spawn_loc)
 
 		spawned_marine.lastarea = get_area(spawn_loc)
 
-		player.client.prefs.copy_all_to(spawned_marine, JOB_MARINE, TRUE, TRUE)
+		setup_human(spawned_marine, player, FALSE)
 		arm_equipment(spawned_marine, /datum/equipment_preset/uscm/horde_mode_marine, FALSE, TRUE)
 
 		SShorde_mode.current_players += list(list("mob" = spawned_marine, "points" = 500))
+		spawned_marine.pain = new /datum/pain/human_hero()
+		spawned_marine.status_flags |= NO_PERMANENT_DAMAGE
 
-		player.mind.transfer_to(spawned_marine, TRUE)
-
-		INVOKE_ASYNC(spawned_marine, TYPE_PROC_REF(/mob/living/carbon/human, regenerate_icons))
-		INVOKE_ASYNC(spawned_marine, TYPE_PROC_REF(/mob/living/carbon/human, update_body), 1, 0)
-		INVOKE_ASYNC(spawned_marine, TYPE_PROC_REF(/mob/living/carbon/human, update_hair))
+		var/entrydisplay = " \
+			[SPAN_ROLE_BODY("|______________________|")] \n\
+			[SPAN_ROLE_HEADER("Welcome to hell!")] \n\
+			[SPAN_ROLE_BODY("You are one of the last surviving members of a marine squad that was sent in to secure a xenomorph infested colony. Unfortunately, most of the squad was wiped out. For the past few days you have holed up in this structure, patiently awaiting rescue. Adrenaline, whether out of fear or a thirst for vengance, has become a part of your blood at this point. It has dulled you to pain, and heightened your body to its absolute peak. Still, you need to keep your quick wits with you if you plan to get out of here alive...")] \n\
+			[SPAN_ROLE_BODY("|______________________|")] \
+		"
+		to_chat_spaced(spawned_marine, html = entrydisplay)
 		break
 
 /mob/dead/verb/join_as_freed_mob()
