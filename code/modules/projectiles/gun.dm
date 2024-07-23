@@ -53,6 +53,7 @@
 	/**How the bullet will behave once it leaves the gun, also used for basic bullet damage and effects, etc.
 	Ammo will be replaced on New() for things that do not use mags.**/
 	var/datum/ammo/ammo = null
+	var/datum/ammo/ammo_override = null
 	///What is currently in the chamber. Most guns will want something in the chamber upon creation.
 	var/obj/projectile/in_chamber = null
 	/*Ammo mags may or may not be internal, though the difference is a few additional variables. If they are not internal, don't call
@@ -1027,6 +1028,8 @@ and you're good to go.
 		var/mob/M = loc
 		weapon_source_mob = M
 	var/obj/projectile/P = new projectile_type(src, create_cause_data(bullet_source, weapon_source_mob))
+	if(ammo_override)
+		chambered = new ammo_override
 	P.generate_bullet(chambered, 0, NO_FLAGS)
 
 	return P

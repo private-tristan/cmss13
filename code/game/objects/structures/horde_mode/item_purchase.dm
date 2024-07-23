@@ -480,11 +480,12 @@
 		return pick(high_tier_gear)
 	return pick(pick(med_tier_gear), pick(low_tier_gear))
 
-
+// Weapon mystery box
+/////////////////////
 /obj/structure/mystery_purchase/weapons
 	high_tier_gear = list(/obj/item/weapon/gun/flamer, /obj/item/weapon/gun/rifle/m46c/mk1_ammo, /obj/item/weapon/gun/shotgun/combat/marsoc, /obj/item/weapon/gun/rifle/m41aMK1)
-	med_tier_gear = list(/obj/item/weapon/gun/shotgun/combat/buckshot, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/m41a, /obj/item/weapon/gun/rifle/type71/carbine, /obj/item/weapon/gun/rifle/lmg, /obj/item/weapon/gun/rifle/xm177)
-	low_tier_gear = list(/obj/item/weapon/gun/rifle/m4ra, /obj/item/weapon/gun/smg/mp5, /obj/item/weapon/gun/smg/fp9000, /obj/item/weapon/gun/rifle/m16, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/mar40/carbine)
+	med_tier_gear = list(/obj/item/weapon/gun/lever_action/r4t, /obj/item/weapon/gun/shotgun/combat/buckshot, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/m41a, /obj/item/weapon/gun/rifle/type71/carbine, /obj/item/weapon/gun/rifle/lmg, /obj/item/weapon/gun/rifle/xm177)
+	low_tier_gear = list(/obj/item/weapon/gun/rifle/m4ra, /obj/item/weapon/gun/smg/mp5, /obj/item/weapon/gun/smg/fp9000, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/mar40/carbine)
 
 /obj/structure/mystery_purchase/weapons/pick_up_item(mob/user)
 	if(last_used_by != user)
@@ -510,12 +511,48 @@
 		amount_to_give = 1
 		purchased_gun.add_firemode(GUN_FIREMODE_AUTOMATIC)
 		purchased_gun.flags_gun_features &= ~GUN_SUPPORT_PLATFORM
+	if(istype(purchased_gun, /obj/item/weapon/gun/lever_action))
+		ammo_to_give = /obj/item/ammo_magazine/lever_action
+		purchased_gun.flags_gun_features &= ~DANGEROUS_TO_ONEHAND_LEVER
+		amount_to_give = 1
 
 	for(amount_to_give, amount_to_give > 0, amount_to_give--)
 		new ammo_to_give(loc)
 	user.put_in_hands(purchased_gun)
 	reset_hovering_effect()
 	picked_item = null
+
+/////////////////////
+// PACK-A-PUNCH //
+/////////////////////
+
+/obj/structure/upgrade_station
+	name = "upgrade station"
+	icon = 'icons/obj/structures/crates.dmi'
+	icon_state = "case"
+
+/obj/structure/upgrade_station/attackby(obj/item/weapon/gun/item_to_upgrade, mob/user)
+	var/weapon_path = item_to_upgrade.type
+	switch(weapon_path)
+		if(/obj/item/weapon/gun/flamer)
+			item_to_upgrade.name = "\proper Meltdown"
+			item_to_upgrade.desc = "Things are going to be pretty hot in here soon."
+			item_to_upgrade.set_fire_delay(FIRE_DELAY_TIER_7)
+			item_to_upgrade.gun_firemode_list |= GUN_FIREMODE_AUTOMATIC
+		if(/obj/item/weapon/gun/rifle/m4ra)
+			item_to_upgrade.name = "\proper Recon"
+			item_to_upgrade.desc = "The last thing they'll ever see."
+			item_to_upgrade.damage_mult = 2.5
+			item_to_upgrade.ammo_override = /datum/ammo/bullet/rifle/ap/penetrating
+		if(/obj/item/weapon/gun/rifle/m46c/mk1_ammo)
+			item_to_upgrade.name = "\proper Primas"
+		if(/obj/item/weapon/gun/lever_action/r4t)
+			item_to_upgrade.name = "\proper Judgement Day"
+			item_to_upgrade.desc = "They forgot to say 'please'."
+			item_to_upgrade.ammo_override = /datum/ammo/bullet/rifle/explosive
+			item_to_upgrade.recoil_unwielded = RECOIL_AMOUNT_TIER_5
+			item_to_upgrade.accuracy_mult_unwielded = BASE_ACCURACY_MULT
+			item_to_upgrade.scatter_unwielded = SCATTER_AMOUNT_TIER_10
 
 /////////////////////
 // HOVERING EFFECT //
