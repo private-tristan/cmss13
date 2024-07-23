@@ -11,8 +11,10 @@ SUBSYSTEM_DEF(horde_mode)
 	var/list/spawnable_xenos = list(
 		/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone
 	)
+	var/list/spawnable_bosses = list()
 	var/spawn_max = 2
 	var/amount_to_spawn = 5
+	var/bosses_to_spawn = 0
 	var/round = 1
 	var/round_ended = FALSE
 	var/xeno_health_mod = 0.35
@@ -52,10 +54,10 @@ SUBSYSTEM_DEF(horde_mode)
 		send_player_message(SPAN_HIGHDANGER("A cacophany of horrific screeches echo in the distance. They're here!"))
 		world << sound(new_round_sound)
 		round++
-		xeno_health_mod += 0.05
+		xeno_health_mod += 0.025
 		xeno_damage_mod += 0.025
 		amount_to_spawn = 3*round+2
-		if(spawn_max < spawn_max + 2 + length(current_players))
+		if(spawn_max < initial(spawn_max) + 3 + length(current_players))
 			spawn_max++
 		round_ended = FALSE
 		round_checked = FALSE
@@ -63,6 +65,14 @@ SUBSYSTEM_DEF(horde_mode)
 	if(!round_checked)
 		round_checked = TRUE
 		handle_new_xenos()
+
+	if(bosses_to_spawn > 0)
+		var/spawn_loc = SAFEPICK(xeno_spawns)
+		var/mob_type = pick(spawnable_bosses)
+		if(isnull(spawn_loc))
+			return
+		new mob_type(spawn_loc)
+		bosses_to_spawn--
 
 	for(spawn_wave, spawn_wave > 0, spawn_wave--)
 		if(length(current_xenos) < spawn_max && amount_to_spawn != 0)
@@ -80,10 +90,14 @@ SUBSYSTEM_DEF(horde_mode)
 	if(round == 4)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/runner)
 		send_player_message(SPAN_XENOHIGHDANGER("You catch a glimpse of something red in the distance... it's moving so fast!"))
-	if(round == 6)
+	if(round == 8)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/lurker)
 		spawnable_xenos.Remove(/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone)
 		send_player_message(SPAN_XENOHIGHDANGER("The air seems to shimmer around you... or is it just your imagination?"))
+	if(round == 10)
+		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
+		bosses_to_spawn++
+		send_player_message(SPAN_XENOHIGHDANGER("You hear menacing footsteps in the distance..."))
 
 /datum/controller/subsystem/horde_mode/proc/update_points(mob/living/player_mob, point_amount)
 	for(var/list/player as anything in current_players)
@@ -94,6 +108,14 @@ SUBSYSTEM_DEF(horde_mode)
 	for(var/list/player_in_list as anything in current_players)
 		var/player_mob = player_in_list["mob"]
 		to_chat(player_mob, message)
+
+
+/datum/controller/subsystem/horde_mode/proc/return_random_player()
+	var/list/all_players
+	for(var/list/player_in_list as anything in current_players)
+		var/player_mob = player_in_list["mob"]
+		all_players += player_mob
+	return pick(all_players)
 
 /datum/controller/subsystem/horde_mode/proc/handle_purchase(mob/living/player_mob, cost)
 	for(var/list/player as anything in current_players)

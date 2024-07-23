@@ -148,7 +148,7 @@
 	..()
 	if(AM == cause_data.resolve_mob())
 		return
-	
+
 	if(isliving(AM))
 		var/mob/living/living_mob = AM
 		if(living_mob.ally_of_hivenumber(hivenumber))

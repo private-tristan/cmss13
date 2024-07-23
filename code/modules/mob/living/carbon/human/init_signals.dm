@@ -23,12 +23,12 @@
 /mob/living/carbon/human/proc/on_perk_speed_gain(datum/source)
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("Your body feels much more tense."))
-	reagent_move_delay_modifier -= 0.33
+	extra_movement_delay_modifier -= 0.33
 
 /mob/living/carbon/human/proc/on_perk_speed_loss(datum/source)
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("Your body seems to relax."))
-	reagent_move_delay_modifier += 0.33
+	extra_movement_delay_modifier += 0.33
 
 /mob/living/carbon/human/proc/on_perk_explosive_resistance_gain(datum/source)
 	SIGNAL_HANDLER

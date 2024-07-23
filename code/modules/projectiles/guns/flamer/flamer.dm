@@ -721,6 +721,7 @@
 			X.emote("roar")
 		X.plasma_stored = X.plasma_max
 
+	M.last_damage_data = weapon_cause_data
 	if(!(sig_result & COMPONENT_NO_IGNITE) && burn_damage)
 		switch(fire_variant)
 			if(FIRE_VARIANT_TYPE_B) //Armor Shredding Greenfire, super easy to pat out. 50 duration -> 10 stacks (1 pat/resist)
@@ -735,8 +736,10 @@
 		to_chat(M, SPAN_DANGER("[isxeno(M) ? "We" : "You"] step over the flames."))
 		return
 
-	M.last_damage_data = weapon_cause_data
-	M.apply_damage(burn_damage, BURN) //This makes fire stronk.
+	if(isanimal(M))
+		M.health -= burn_damage
+	else
+		M.apply_damage(burn_damage, BURN) //This makes fire stronk.
 
 	var/variant_burn_msg = null
 	switch(fire_variant) //Fire variant special message appends.

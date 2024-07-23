@@ -127,7 +127,7 @@
 	if(P.damage)
 		var/splatter_dir = get_dir(P.starting, loc)//loc is the xeno getting hit, P.starting is the turf of where the projectile got spawned
 		new /obj/effect/temp_visual/dir_setting/bloodsplatter/xenosplatter(loc, splatter_dir)
-		if(prob(15))
+		if(prob(15) && stat != DEAD)
 			roar_emote()
 
 /mob/living/simple_animal/hostile/alien/AttackingTarget()

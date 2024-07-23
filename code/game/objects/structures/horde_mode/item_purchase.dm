@@ -32,9 +32,13 @@
 		if(!custom_hovering_icon)
 			hovering_effect.icon = primary_purchase.icon
 			hovering_effect.icon_state = primary_purchase.icon_state
+			hovering_effect.name = primary_purchase.name
+			hovering_effect.desc = primary_purchase.desc
 		else
 			hovering_effect.icon = custom_hovering_icon.icon
 			hovering_effect.icon_state = custom_hovering_icon.icon_state
+			hovering_effect.name = custom_hovering_icon.name
+			hovering_effect.desc = custom_hovering_icon.desc
 
 /obj/structure/item_purchase/attack_hand(mob/user)
 	var/obj/item/purchased_item
@@ -93,8 +97,8 @@
 	name = "M39 submachinegun case"
 	primary_purchase = /obj/item/weapon/gun/smg/m39
 	secondary_purchase = /obj/item/ammo_magazine/smg/m39
-	primary_cost = 700
-	secondary_cost = 200
+	primary_cost = 750
+	secondary_cost = 250
 
 
 /obj/structure/item_purchase/machete
@@ -151,10 +155,8 @@
 	custom_hovering_icon = /obj/item/storage/firstaid
 	primary_purchase = /obj/item/stack/medical/bruise_pack
 	secondary_purchase = /obj/item/stack/medical/ointment
-	tertiary_purchase = /obj/item/stack/medical/splint
 	primary_cost = 200
 	secondary_cost = 200
-	tertiary_cost = 200
 
 
 ///////////////
@@ -234,10 +236,10 @@
 	icon_state = "closed_green"
 	custom_hovering_icon = /obj/item/ammo_box/rounds
 	primary_purchase = null
-	primary_cost = 1000 // RIFLES
-	secondary_cost = 500 // SMGS
-	tertiary_cost = 250 // PISTOLS
-	quaternary_cost = 1500 // everything else
+	primary_cost = 500 // RIFLES
+	secondary_cost = 400 // SMGS
+	tertiary_cost = 200 // PISTOLS
+	quaternary_cost = 600 // everything else
 
 /obj/structure/item_purchase/ammo_refill/Initialize(mapload, ...)
 	. = ..()
@@ -277,7 +279,7 @@
 		if(!SShorde_mode.handle_purchase(user, actual_cost))
 			return
 		purchased_item = new magazine.type(loc)
-		playsound(loc, pick('sound/weapons/handling/mag_refill_1.ogg', 'sound/weapons/handling/mag_refill_2.ogg', 'sound/weapons/handling/mag_refill_3.ogg'), 25, 1)
+		playsound(loc, pick('sound/weapons/handling/mag_refill_1.ogg', 'sound/weapons/handling/mag_refill_2.ogg', 'sound/weapons/handling/mag_refill_3.ogg'), 40 , 1)
 		qdel(magazine)
 
 	user.put_in_hands(purchased_item)
@@ -286,7 +288,7 @@
 	. = list()
 	. += "[icon2html(src, user)] That's \a [src]."
 	. += desc
-	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to refill your magazine: \n<b>rifle magazine</b> - [primary_cost] points\n<b>SMG magazine</b> - [secondary_cost]points\n<b>pistol magazine</b> - [tertiary_cost] points\n<b>other magazines</b> - [quaternary_cost] points.")
+	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to refill your magazine: \n<b>rifle magazine</b> - [primary_cost] points\n<b>SMG magazine</b> - [secondary_cost] points\n<b>pistol magazine</b> - [tertiary_cost] points\n<b>other magazines</b> - [quaternary_cost] points")
 
 
 ///////////////////
@@ -295,8 +297,14 @@
 /obj/structure/item_purchase/perk_machine
 	name = "Juggernaut Souto machine"
 	desc = "This drink is infused with special protein chains that decrease prostaglandin production, along with enhancing the downstream of nitric oxide pathways inside the body. This ultimately leads to a weaker pain response and a stronger blood flow, allowing for the user to stay standing for a longer period of time. It's cranberry flavour, too!"
+	icon = 'icons/obj/structures/machinery/vending.dmi'
+	icon_state = "Cola_Machine"
 	primary_cost = 3500
 	primary_purchase = /obj/item/perk_bottle
+
+/obj/structure/item_purchase/perk_machine/Initialize(mapload, ...)
+	. = ..()
+	hovering_effect.pixel_y = 24
 
 /obj/item/perk_bottle
 	name = "\improper Juggernaut Souto"
@@ -368,9 +376,9 @@
 	desc = "Do you feel lucky?"
 	icon_state = "closed_woodcrate"
 	var/obj/effect/hovering_effect
-	var/list/high_tier_gear = list(/obj/item/weapon/gun/flamer, /obj/item/weapon/gun/rifle/m46c/mk1_ammo, /obj/item/weapon/gun/shotgun/combat/marsoc, /obj/item/weapon/gun/rifle/m41aMK1)
-	var/list/med_tier_gear = list(/obj/item/weapon/gun/shotgun/combat/buckshot, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/m41a, /obj/item/weapon/gun/rifle/type71/carbine, /obj/item/weapon/gun/rifle/lmg, /obj/item/weapon/gun/rifle/xm177)
-	var/list/low_tier_gear = list(/obj/item/weapon/gun/rifle/m4ra, /obj/item/weapon/gun/smg/mp5, /obj/item/weapon/gun/smg/fp9000, /obj/item/weapon/gun/rifle/m16, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/mar40/carbine, /obj/item/weapon/gun/rifle/mar40, )
+	var/list/high_tier_gear = list(/obj/item/weapon/gun/flamer)
+	var/list/med_tier_gear = list(/obj/item/weapon/gun/shotgun/combat/buckshot)
+	var/list/low_tier_gear = list(/obj/item/weapon/gun/rifle/m4ra)
 	var/cost = 750
 	var/obj/item/picked_item
 	var/mob/living/last_used_by
@@ -378,17 +386,15 @@
 
 /obj/structure/mystery_purchase/Initialize(mapload, ...)
 	. = ..()
-	hovering_effect = new /obj/effect/item_purchase(loc)
-	hovering_effect.icon = 'icons/effects/techtree/tech.dmi'
-	hovering_effect.icon_state = "unknown"
+	hovering_effect = new /obj/effect/item_purchase/mystery(loc)
 
 /obj/structure/mystery_purchase/get_examine_text(mob/user)
 	. = ..()
-	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to get a random weapon for [cost] points.")
+	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to get a random item for [cost] points.")
 	. += SPAN_NOTICE("Don't like the item? Use <b>DISARM INTENT</b> to get half of your points back.")
 
 /obj/structure/mystery_purchase/attack_hand(mob/user)
-	if(user.a_intent != INTENT_HELP || is_spinning)
+	if(is_spinning)
 		return
 
 	if(picked_item)
@@ -399,13 +405,12 @@
 			refund_item(user)
 			return
 
-	if(!SShorde_mode.handle_purchase(user, cost))
+	if(!SShorde_mode.handle_purchase(user, cost) || user.a_intent != INTENT_HELP)
 		return
 
 	last_used_by = user
 	picked_item = handle_mystery_item()
 	mystery_purchase_effect()
-	blink_effect()
 
 /obj/structure/mystery_purchase/proc/mystery_purchase_effect()
 	is_spinning = TRUE
@@ -419,31 +424,21 @@
 		hovering_effect.icon_state = random_item.icon_state
 		sleep(0.3 SECONDS)
 
+	is_spinning = FALSE
+	hovering_effect.name = picked_item.name
+	hovering_effect.desc = picked_item.desc
 	hovering_effect.icon = picked_item.icon
 	hovering_effect.icon_state = picked_item.icon_state
-	is_spinning = FALSE
+	hovering_effect.transition_filter("outline", list(color = COLOR_YELLOW), 0.25 SECONDS, QUAD_EASING)
+	INVOKE_ASYNC(src, PROC_REF(blink_effect))
 
 /obj/structure/mystery_purchase/proc/pick_up_item(mob/user)
 	if(last_used_by != user)
 		to_chat(user, SPAN_WARNING("That's not yours!"))
 		return
 
-	if(ispath(picked_item, /obj/item/weapon/gun))
-		var/obj/item/weapon/gun/purchased_gun = new picked_item(loc)
-		var/ammo_to_give
-		if(istype(purchased_gun, /obj/item/weapon/gun/shotgun))
-			//Buff shotguns so they're actually useable.
-			ammo_to_give = /obj/item/ammo_magazine/shotgun/buckshot
-			purchased_gun.set_fire_delay(purchased_gun.get_fire_delay() * 0.6)
-		else
-			ammo_to_give = purchased_gun.current_mag.type
-		for(var/i = 0, i <= 2, i++)
-			new ammo_to_give(loc)
-		user.put_in_hands(purchased_gun)
-	else
-		var/obj/item/purchased_item = new picked_item(loc)
-		user.put_in_hands(purchased_item)
-
+	var/obj/item/purchased_item = new picked_item(loc)
+	user.put_in_hands(purchased_item)
 	reset_hovering_effect()
 	picked_item = null
 
@@ -458,30 +453,69 @@
 	picked_item = null
 
 /obj/structure/mystery_purchase/proc/blink_effect()
+	if(is_spinning)
+		return
 	sleep(4 SECONDS)
 	for(var/i = 0, i < 20, i++)
-		if(!picked_item)
+		if(is_spinning || !picked_item)
 			return
 		hovering_effect.alpha = 0
 		sleep((0.5 - i / 10) SECONDS)
 		hovering_effect.alpha = 255
 		sleep((0.5 - i / 10) SECONDS)
-	picked_item = null
 	reset_hovering_effect()
+	picked_item = null
 
 /obj/structure/mystery_purchase/proc/reset_hovering_effect()
-	hovering_effect.icon = 'icons/effects/techtree/tech.dmi'
-	hovering_effect.icon_state = "unknown"
+	hovering_effect.name = initial(hovering_effect.name)
+	hovering_effect.desc = initial(hovering_effect.desc)
+	hovering_effect.icon = initial(hovering_effect.icon)
+	hovering_effect.icon_state = initial(hovering_effect.icon_state)
 	hovering_effect.alpha = 255
+	hovering_effect.transition_filter("outline", list(color = COLOR_WHITE), 0.25 SECONDS, QUAD_EASING)
 	icon_state = "closed_woodcrate"
 
 /obj/structure/mystery_purchase/proc/handle_mystery_item()
-	if(prob(10))
+	if(prob(10 + SShorde_mode.round))
 		return pick(high_tier_gear)
-	if(prob(30))
-		return pick(med_tier_gear)
-	return pick(low_tier_gear)
+	return pick(pick(med_tier_gear), pick(low_tier_gear))
 
+
+/obj/structure/mystery_purchase/weapons
+	high_tier_gear = list(/obj/item/weapon/gun/flamer, /obj/item/weapon/gun/rifle/m46c/mk1_ammo, /obj/item/weapon/gun/shotgun/combat/marsoc, /obj/item/weapon/gun/rifle/m41aMK1)
+	med_tier_gear = list(/obj/item/weapon/gun/shotgun/combat/buckshot, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/m41a, /obj/item/weapon/gun/rifle/type71/carbine, /obj/item/weapon/gun/rifle/lmg, /obj/item/weapon/gun/rifle/xm177)
+	low_tier_gear = list(/obj/item/weapon/gun/rifle/m4ra, /obj/item/weapon/gun/smg/mp5, /obj/item/weapon/gun/smg/fp9000, /obj/item/weapon/gun/rifle/m16, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/mar40/carbine)
+
+/obj/structure/mystery_purchase/weapons/pick_up_item(mob/user)
+	if(last_used_by != user)
+		to_chat(user, SPAN_WARNING("That's not yours!"))
+		return
+
+	var/obj/item/weapon/gun/purchased_gun = new picked_item(loc)
+	var/ammo_to_give = purchased_gun.current_mag.type
+	var/amount_to_give
+
+	if(purchased_gun in high_tier_gear)
+		amount_to_give = 1
+	if(purchased_gun in med_tier_gear)
+		amount_to_give = 2
+	else
+		amount_to_give = 3
+
+	if(istype(purchased_gun, /obj/item/weapon/gun/shotgun))
+		ammo_to_give = /obj/item/ammo_magazine/shotgun/buckshot
+		amount_to_give = 1
+		purchased_gun.set_fire_delay(purchased_gun.get_fire_delay() * 0.6)
+	if(istype(purchased_gun, /obj/item/weapon/gun/rifle/lmg))
+		amount_to_give = 1
+		purchased_gun.add_firemode(GUN_FIREMODE_AUTOMATIC)
+		purchased_gun.flags_gun_features &= ~GUN_SUPPORT_PLATFORM
+
+	for(amount_to_give, amount_to_give > 0, amount_to_give--)
+		new ammo_to_give(loc)
+	user.put_in_hands(purchased_gun)
+	reset_hovering_effect()
+	picked_item = null
 
 /////////////////////
 // HOVERING EFFECT //
@@ -494,3 +528,9 @@
 /obj/effect/item_purchase/Initialize(mapload, ...)
 	. = ..()
 	add_filter("outline", 1, outline_filter(size = 1, color = COLOR_WHITE, flags = OUTLINE_SHARP))
+
+/obj/effect/item_purchase/mystery
+	name = "mystery item"
+	desc = "What are you going to get?"
+	icon = 'icons/effects/techtree/tech.dmi'
+	icon_state = "unknown"
