@@ -12,6 +12,7 @@ SUBSYSTEM_DEF(horde_mode)
 		/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone
 	)
 	var/list/spawnable_bosses = list()
+	var/list/corrupted_xenos = list()
 	var/spawn_max = 2
 	var/amount_to_spawn = 5
 	var/bosses_to_spawn = 0
@@ -20,7 +21,6 @@ SUBSYSTEM_DEF(horde_mode)
 	var/xeno_health_mod = 0.35
 	var/xeno_damage_mod = 0.5
 	var/intro_played = TRUE
-	var/round_checked = TRUE
 	var/spawn_wave = 2
 	var/max_sentries = 2
 	var/sentries_active = 0
@@ -53,18 +53,7 @@ SUBSYSTEM_DEF(horde_mode)
 	if(!amount_to_spawn && !length(current_xenos) && COOLDOWN_FINISHED(src, round_cooldown))
 		send_player_message(SPAN_HIGHDANGER("A cacophany of horrific screeches echo in the distance. They're here!"))
 		world << sound(new_round_sound)
-		round++
-		xeno_health_mod += 0.025
-		xeno_damage_mod += 0.025
-		amount_to_spawn = 3*round+2
-		if(spawn_max < initial(spawn_max) + 3 + length(current_players))
-			spawn_max++
-		round_ended = FALSE
-		round_checked = FALSE
-
-	if(!round_checked)
-		round_checked = TRUE
-		handle_new_xenos()
+		increment_round()
 
 	if(bosses_to_spawn > 0)
 		var/spawn_loc = SAFEPICK(xeno_spawns)
@@ -84,20 +73,34 @@ SUBSYSTEM_DEF(horde_mode)
 			amount_to_spawn--
 	spawn_wave = clamp(round, 1, 6)
 
+/datum/controller/subsystem/horde_mode/proc/increment_round(times = 1)
+	for(times, times > 0, times--)
+		round++
+		xeno_health_mod += 0.025
+		xeno_damage_mod += 0.025
+		amount_to_spawn = 3*round+2
+		if(spawn_max < initial(spawn_max) + 3 + length(current_players))
+			spawn_max++
+		round_ended = FALSE
+		handle_new_xenos()
+
 /datum/controller/subsystem/horde_mode/proc/handle_new_xenos()
 	if(round == 2)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode)
 	if(round == 4)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/runner)
 		send_player_message(SPAN_XENOHIGHDANGER("You catch a glimpse of something red in the distance... it's moving so fast!"))
-	if(round == 8)
+	if(round == 6)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/lurker)
 		spawnable_xenos.Remove(/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone)
 		send_player_message(SPAN_XENOHIGHDANGER("The air seems to shimmer around you... or is it just your imagination?"))
+	if(round == 8)
+		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/warrior)
+		send_player_message(SPAN_XENOHIGHDANGER("You start hearing bloodcurdling roars in the distance..."))
 	if(round == 10)
 		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
 		bosses_to_spawn++
-		send_player_message(SPAN_XENOHIGHDANGER("You hear menacing footsteps in the distance..."))
+		send_player_message(SPAN_XENOHIGHDANGER("You hear menacing stomps in the distance..."))
 
 /datum/controller/subsystem/horde_mode/proc/update_points(mob/living/player_mob, point_amount)
 	for(var/list/player as anything in current_players)
@@ -113,8 +116,9 @@ SUBSYSTEM_DEF(horde_mode)
 /datum/controller/subsystem/horde_mode/proc/return_random_player()
 	var/list/all_players
 	for(var/list/player_in_list as anything in current_players)
-		var/player_mob = player_in_list["mob"]
-		all_players += player_mob
+		var/mob/living/player_mob = player_in_list["mob"]
+		if(player_mob.stat != DEAD)
+			all_players += player_mob
 	return pick(all_players)
 
 /datum/controller/subsystem/horde_mode/proc/handle_purchase(mob/living/player_mob, cost)

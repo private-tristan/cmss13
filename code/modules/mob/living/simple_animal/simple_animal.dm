@@ -62,10 +62,13 @@
 
 /mob/living/simple_animal/Initialize()
 	. = ..()
-	SSmob.living_misc_mobs += src
+	//HORDE MODE ENEMIES ARE HANDLED BY A SEPERATE CONTROLLER
+	if(!istype(src, /mob/living/simple_animal/hostile/alien/horde_mode))
+		SSmob.living_misc_mobs += src
 
 /mob/living/simple_animal/Destroy()
-	SSmob.living_misc_mobs -= src
+	if(!istype(src, /mob/living/simple_animal/hostile/alien/horde_mode))
+		SSmob.living_misc_mobs -= src
 	return ..()
 
 /mob/living/simple_animal/Login()

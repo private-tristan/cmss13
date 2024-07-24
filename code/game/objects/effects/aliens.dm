@@ -246,6 +246,8 @@
 /obj/effect/xenomorph/spray/strong/no_stun
 	stun_duration = 0
 
+/obj/effect/xenomorph/spray/strong/no_stun/short_duration
+	time_to_live = 6
 
 /obj/effect/xenomorph/spray/praetorian
 	name = "splatter"
