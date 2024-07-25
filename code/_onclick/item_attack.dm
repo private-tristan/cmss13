@@ -104,7 +104,7 @@
 			X.apply_armorbreak(armor_punch)
 		if(isanimal(M))
 			var/mob/living/simple_animal/animal = M
-			power = power * animal.melee_damage_multiplier
+			power = power * animal.melee_damage_taken_multiplier
 		if(hitsound)
 			playsound(loc, hitsound, 25, 1)
 		switch(damtype)

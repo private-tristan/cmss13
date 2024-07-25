@@ -1,13 +1,13 @@
 /obj/structure/item_purchase
-	name = "item purchase"
+	name = "\improper item purchase"
 	icon = 'icons/obj/structures/crates.dmi'
 	icon_state = "case"
 	var/obj/primary_purchase = /obj/item/weapon/gun/rifle/m41a
 	var/obj/secondary_purchase
 	var/obj/tertiary_purchase
 	var/obj/quaternary_purchase
-	var/primary_cost = 1000
-	var/secondary_cost = 300
+	var/primary_cost = 1500
+	var/secondary_cost = 500
 	var/tertiary_cost
 	var/quaternary_cost
 	var/has_post_purchase_effect = FALSE
@@ -82,27 +82,32 @@
 // ITEM PURCHASES //
 ////////////////////
 /obj/structure/item_purchase/m41a
-	name = "M41A pulse rifle MK2 case"
+	name = "\improper M41A pulse rifle MK2 case"
 	secondary_purchase = /obj/item/ammo_magazine/rifle
 
 
 /obj/structure/item_purchase/abr40
-	name = "ABR-40 hunting rifle case"
+	name = "\improper ABR-40 hunting rifle case"
 	primary_purchase = /obj/item/weapon/gun/rifle/l42a/abr40
 	secondary_purchase = /obj/item/ammo_magazine/rifle/l42a/abr40
-	primary_cost = 350
-	secondary_cost = 100
+	primary_cost = 400
+	secondary_cost = 300
+	has_post_purchase_effect = TRUE
+
+/obj/structure/item_purchase/abr40/post_purchase_effect(obj/item/weapon/gun/purchased_gun)
+	if(istype(src, /obj/item/weapon/gun))
+		purchased_gun.damage_mult = 1.5
 
 /obj/structure/item_purchase/m39
-	name = "M39 submachinegun case"
+	name = "\improper M39 submachinegun case"
 	primary_purchase = /obj/item/weapon/gun/smg/m39
 	secondary_purchase = /obj/item/ammo_magazine/smg/m39
-	primary_cost = 750
-	secondary_cost = 250
+	primary_cost = 1000
+	secondary_cost = 400
 
 
 /obj/structure/item_purchase/machete
-	name = "M2132 machete case"
+	name = "\improper M2132 machete case"
 	custom_hovering_icon = /obj/item/weapon/sword/machete
 	primary_purchase = /obj/item/storage/large_holster/machete/full
 	secondary_purchase = /obj/item/storage/pouch/machete/full
@@ -115,7 +120,7 @@
 		machete.force += MELEE_FORCE_WEAK
 
 /obj/structure/item_purchase/sentry
-	name = "disposable UA 571-C sentry gun case"
+	name = "\improper disposable UA 571-C sentry gun case"
 	desc = "A deployable, disposable, semi-automated turret with AI targeting capabilities. Hits hard, but only contains 150 rounds of ammo. Once it runs dry, say goodbye."
 	primary_purchase = /obj/item/defenses/handheld/sentry/horde_mode
 	primary_cost = 2000
@@ -131,14 +136,15 @@
 	. += SPAN_DANGER("Purchase limit: <b>[SShorde_mode.sentries_active]/[SShorde_mode.max_sentries]</b>")
 
 /obj/structure/item_purchase/hedp
-	name = "M40 HEDP grenade crate"
+	name = "\improper M40 HEDP grenade crate"
 	icon = 'icons/obj/items/storage.dmi'
 	icon_state = "nade_placeholder"
 	primary_purchase = /obj/item/explosive/grenade/high_explosive
 	primary_cost = 200
+	pixel_x = -1
 
 /obj/structure/item_purchase/gear
-	name = "gear case"
+	name = "\improper gear case"
 	icon_state = "closed_woodcrate"
 	primary_purchase = /obj/item/clothing/accessory/storage/droppouch
 	secondary_purchase = /obj/item/storage/pouch/magazine
@@ -150,14 +156,24 @@
 	quaternary_cost = 500
 
 /obj/structure/item_purchase/firstaid
-	name = "basic medical equipment"
+	name = "\improper basic medical equipment"
 	icon_state = "closed_medical"
 	custom_hovering_icon = /obj/item/storage/firstaid
 	primary_purchase = /obj/item/stack/medical/bruise_pack
 	secondary_purchase = /obj/item/stack/medical/ointment
+	tertiary_purchase =  /obj/item/reagent_container/hypospray/autoinjector/merabicard
+	quaternary_purchase = /obj/item/reagent_container/hypospray/autoinjector/keloderm
 	primary_cost = 200
 	secondary_cost = 200
+	tertiary_cost = 600
+	quaternary_cost = 600
 
+/obj/structure/item_purchase/firstaid_adv
+	name = "\improper advanced medical equipment"
+	icon_state = "closed_medical"
+	custom_hovering_icon = /obj/item/storage/firstaid/adv
+	primary_purchase = /obj/item/horde_mode/stim/healing
+	primary_cost = 600
 
 ///////////////
 // OBSTACLES //
@@ -220,6 +236,7 @@
 		playsound(src, 'sound/effects/refill.ogg', 25, 1, 3)
 		qdel(injector)
 
+	to_chat(user, SPAN_NOTICE("You refill [purchased_item]."))
 	user.put_in_hands(purchased_item)
 
 /obj/structure/item_purchase/injector_refill/get_examine_text(mob/user)
@@ -232,12 +249,12 @@
 
 /obj/structure/item_purchase/ammo_refill
 	name = "ammo dump"
-	desc = "There's a bunch of ammo sitting here. You could probably make use of it..."
+	desc = "There's a bunch of ammo sitting here. Shotgun shells, rifle, submachinegun and pistol rounds, flamer tanks... You could probably make use of it."
 	icon_state = "closed_green"
 	custom_hovering_icon = /obj/item/ammo_box/rounds
 	primary_purchase = null
-	primary_cost = 500 // RIFLES
-	secondary_cost = 400 // SMGS
+	primary_cost = 300 // RIFLES
+	secondary_cost = 250 // SMGS
 	tertiary_cost = 200 // PISTOLS
 	quaternary_cost = 600 // everything else
 
@@ -246,12 +263,17 @@
 	hovering_effect.overlays += image(icon = 'icons/obj/items/weapons/guns/ammo_boxes/handfuls.dmi', icon_state = "rounds_reg")
 
 /obj/structure/item_purchase/ammo_refill/attackby(obj/item/ammo_magazine/magazine, mob/user)
-	if(!istype(magazine, /obj/item/ammo_magazine))
+	if(!istype(magazine, /obj/item/ammo_magazine) || istype(magazine, /obj/item/ammo_magazine/handful))
 		to_chat(user, SPAN_WARNING("You can't refill this!"))
 		return
-	if(magazine.current_rounds == magazine.max_rounds)
+	if(magazine.current_rounds == magazine.max_rounds && !istype(magazine, /obj/item/ammo_magazine/flamer_tank))
 		to_chat(user, SPAN_WARNING("[magazine] is already full!"))
 		return
+	if(istype(magazine, /obj/item/ammo_magazine/flamer_tank))
+		var/obj/item/ammo_magazine/flamer_tank/tank = src
+		if(length(tank.reagents.reagent_list) >= tank.max_rounds)
+			to_chat(user, SPAN_WARNING("[tank] is already full!"))
+			return
 
 	var/magazine_type
 	if(istype(magazine, /obj/item/ammo_magazine/pistol))
@@ -279,10 +301,17 @@
 		if(!SShorde_mode.handle_purchase(user, actual_cost))
 			return
 		purchased_item = new magazine.type(loc)
-		playsound(loc, pick('sound/weapons/handling/mag_refill_1.ogg', 'sound/weapons/handling/mag_refill_2.ogg', 'sound/weapons/handling/mag_refill_3.ogg'), 40 , 1)
+		if(istype(purchased_item, /obj/item/ammo_magazine/flamer_tank))
+			playsound(src, 'sound/effects/refill.ogg', 50, 1, 3)
+		else
+			playsound(loc, pick('sound/weapons/handling/mag_refill_1.ogg', 'sound/weapons/handling/mag_refill_2.ogg', 'sound/weapons/handling/mag_refill_3.ogg'), 50 , 1)
 		qdel(magazine)
 
+	to_chat(user, SPAN_NOTICE("You refill [purchased_item]."))
 	user.put_in_hands(purchased_item)
+
+/obj/structure/item_purchase/ammo_refill/attack_hand(mob/user)
+	return
 
 /obj/structure/item_purchase/ammo_refill/get_examine_text(mob/user)
 	. = list()
@@ -301,10 +330,16 @@
 	icon_state = "Cola_Machine"
 	primary_cost = 3500
 	primary_purchase = /obj/item/perk_bottle
+	pixel_x = -1
+	var/image/soda_overlay
+	var/soda_overlay_color = "#fd5656" //no fitting predefined color, sadly
 
 /obj/structure/item_purchase/perk_machine/Initialize(mapload, ...)
 	. = ..()
 	hovering_effect.pixel_y = 24
+	soda_overlay = image(icon, icon_state = "+Cola_Machine_overlay")
+	soda_overlay.color = soda_overlay_color
+	overlays += soda_overlay
 
 /obj/item/perk_bottle
 	name = "\improper Juggernaut Souto"
@@ -337,7 +372,7 @@
 		return
 
 	playsound(user.loc, 'sound/items/drink.ogg', 15, 1)
-	ADD_TRAIT(user, perk_trait, src)
+	ADD_TRAIT(user, perk_trait, PERK_TRAIT)
 	to_chat(user, SPAN_NOTICE("You douse your thirst with [src]. That hits the spot!"))
 	qdel(src)
 
@@ -346,6 +381,7 @@
 	desc = "This drink is infused with chemicals that put the body's adrenal glands into overdrive, making them constantly pump out small amounts of adrenaline at a steady pace. The adrenal medulla is enhanced, allowing it to regulate epinephrine's effect on the body even more-so than before, which helps the heart handle the increased rush. It's pineapple flavour, too!"
 	primary_cost = 3000
 	primary_purchase = /obj/item/perk_bottle/speed
+	soda_overlay_color = COLOR_YELLOW
 
 /obj/item/perk_bottle/speed
 	name = "\improper Speed Souto"
@@ -356,9 +392,10 @@
 
 /obj/structure/item_purchase/perk_machine/explosive_resistance
 	name = "Boom Souto machine"
-	desc = "This drink is infused with specialized myoblasts, which heighten the framework of connective tissue found around the muscles of the body. This leads to a strengthened muscle tissue, especially against shockwaves and blasts."
+	desc = "This drink is infused with specialized myoblasts, which heighten the framework of connective tissue found around the muscles of the body. This leads to a strengthened muscle tissue, especially against shockwaves and blasts. It's grape flavour, too!"
 	primary_cost = 2500
 	primary_purchase = /obj/item/perk_bottle/explosive_resistance
+	soda_overlay_color = LIGHT_COLOR_PINK
 
 /obj/item/perk_bottle/explosive_resistance
 	name = "\improper Boom Souto"
@@ -366,6 +403,21 @@
 	icon = 'icons/obj/items/drinkcans.dmi'
 	icon_state = "souto_grape"
 	perk_trait = TRAIT_PERK_EXPLOSIVE_RESISTANCE
+
+/obj/structure/item_purchase/perk_machine/revive
+	name = "Revive Souto machine"
+	desc = "This drink is infused with specialized myoblasts, which heighten the framework of connective tissue found around the muscles of the body. This leads to a strengthened muscle tissue, especially against shockwaves and blasts."
+	primary_cost = 2000
+	primary_purchase = /obj/item/perk_bottle/revive
+	soda_overlay_color = "#7da8fd"
+
+/obj/item/perk_bottle/revive
+	name = "\improper Revive Souto"
+	desc = "When everything's been dragging you down, grabbed you by the hair and pulled you to the ground..."
+	icon = 'icons/obj/items/drinkcans.dmi'
+	icon_state = "souto_blueraspberry"
+	perk_trait = TRAIT_PERK_REVIVE
+
 
 /////////////////
 // MYSTERY BOX //
@@ -383,15 +435,22 @@
 	var/obj/item/picked_item
 	var/mob/living/last_used_by
 	var/is_spinning = FALSE
+	var/can_refund = TRUE
+	///The proper icon_state for the object. Uses the icons in crates.dmi without the closed_ or open_ prefix.
+	var/crate_variant = "woodcrate"
 
 /obj/structure/mystery_purchase/Initialize(mapload, ...)
 	. = ..()
 	hovering_effect = new /obj/effect/item_purchase/mystery(loc)
+	icon_state = "closed_[crate_variant]"
 
 /obj/structure/mystery_purchase/get_examine_text(mob/user)
 	. = ..()
 	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to get a random item for [cost] points.")
-	. += SPAN_NOTICE("Don't like the item? Use <b>DISARM INTENT</b> to get half of your points back.")
+	if(can_refund)
+		. += SPAN_NOTICE("Don't like the item? Use <b>DISARM INTENT</b> to get half of your points back.")
+	else
+		. += SPAN_DANGER("Don't like the item? Too bad. Suck it up.")
 
 /obj/structure/mystery_purchase/attack_hand(mob/user)
 	if(is_spinning)
@@ -401,7 +460,7 @@
 		if(user.a_intent == INTENT_HELP)
 			pick_up_item(user)
 			return
-		if(user.a_intent == INTENT_DISARM)
+		if(user.a_intent == INTENT_DISARM && can_refund)
 			refund_item(user)
 			return
 
@@ -416,7 +475,7 @@
 	is_spinning = TRUE
 	playsound(loc, 'sound/effects/horde_mode/mystery_purchase.ogg')
 	sleep(0.25 SECONDS)
-	icon_state = "open_woodcrate"
+	icon_state = "open_[crate_variant]"
 	sleep(0.25 SECONDS)
 	for(var/i = 0, i < 17, i++)
 		var/obj/item/random_item = pick(pick(low_tier_gear), pick(med_tier_gear), pick(high_tier_gear))
@@ -473,17 +532,66 @@
 	hovering_effect.icon_state = initial(hovering_effect.icon_state)
 	hovering_effect.alpha = 255
 	hovering_effect.transition_filter("outline", list(color = COLOR_WHITE), 0.25 SECONDS, QUAD_EASING)
-	icon_state = "closed_woodcrate"
+	icon_state = "closed_[crate_variant]"
 
 /obj/structure/mystery_purchase/proc/handle_mystery_item()
 	if(prob(10 + SShorde_mode.round))
 		return pick(high_tier_gear)
 	return pick(pick(med_tier_gear), pick(low_tier_gear))
 
+
+// Goodie box
+/////////////////////
+
+/obj/structure/mystery_purchase/goodies
+	name = "mystery goodies box"
+	desc = "They're not weapons, but they could be just as good as guns."
+	icon_state = "closed_ammo_alt"
+	crate_variant = "ammo_alt"
+	high_tier_gear = list(/obj/item/horde_mode/stim/cipher)
+	med_tier_gear = list(/obj/item/horde_mode/stim/healing/speed)
+	low_tier_gear = list(/obj/item/horde_mode/stim/healing)
+	cost = 500
+	can_refund = FALSE
+
+/obj/structure/mystery_purchase/goodies/mystery_purchase_effect()
+	is_spinning = TRUE
+	playsound(loc, 'sound/effects/horde_mode/mystery_purchase.ogg')
+	sleep(0.25 SECONDS)
+	icon_state = "open_[crate_variant]"
+	sleep(0.25 SECONDS)
+	for(var/i = 0, i < 17, i++)
+		var/obj/item/random_item = pick(pick(low_tier_gear), pick(med_tier_gear), pick(high_tier_gear))
+		hovering_effect.overlays = null
+		hovering_effect.icon = random_item.icon
+		hovering_effect.icon_state = random_item.icon_state
+
+		if(ispath(random_item, /obj/item/horde_mode/stim))
+			var/obj/item/horde_mode/stim/picked_stim = random_item
+			var/image/reagent_image = image(picked_stim.icon, icon_state = picked_stim.reagent_image_fill)
+			reagent_image.color = picked_stim.reagent_color
+			hovering_effect.overlays += reagent_image
+
+		sleep(0.3 SECONDS)
+
+	is_spinning = FALSE
+	hovering_effect.name = picked_item.name
+	hovering_effect.desc = picked_item.desc
+	hovering_effect.icon = picked_item.icon
+	hovering_effect.icon_state = picked_item.icon_state
+	hovering_effect.transition_filter("outline", list(color = COLOR_YELLOW), 0.25 SECONDS, QUAD_EASING)
+	INVOKE_ASYNC(src, PROC_REF(blink_effect))
+
+
+
+/obj/item/horde_mode/stim/Initialize(mapload, ...)
+	. = ..()
+
+
 // Weapon mystery box
 /////////////////////
 /obj/structure/mystery_purchase/weapons
-	high_tier_gear = list(/obj/item/weapon/gun/flamer, /obj/item/weapon/gun/rifle/m46c/mk1_ammo, /obj/item/weapon/gun/shotgun/combat/marsoc, /obj/item/weapon/gun/rifle/m41aMK1)
+	high_tier_gear = list(/obj/item/weapon/gun/flamer, /obj/item/weapon/gun/rifle/m46c/horde_mode, /obj/item/weapon/gun/shotgun/combat/marsoc, /obj/item/weapon/gun/rifle/m41aMK1)
 	med_tier_gear = list(/obj/item/weapon/gun/lever_action/r4t, /obj/item/weapon/gun/shotgun/combat/buckshot, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/m41a, /obj/item/weapon/gun/rifle/type71/carbine, /obj/item/weapon/gun/rifle/lmg, /obj/item/weapon/gun/rifle/xm177)
 	low_tier_gear = list(/obj/item/weapon/gun/rifle/m4ra, /obj/item/weapon/gun/smg/mp5, /obj/item/weapon/gun/smg/fp9000, /obj/item/weapon/gun/rifle/mar40/lmg, /obj/item/weapon/gun/rifle/mar40/carbine)
 
@@ -533,26 +641,95 @@
 
 /obj/structure/upgrade_station/attackby(obj/item/weapon/gun/item_to_upgrade, mob/user)
 	var/weapon_path = item_to_upgrade.type
+	var/outline_color = "#b1007c"
+	var/alpha = 70
+	outline_color += num2text(alpha, 2, 16)
+
+	item_to_upgrade.add_filter("outline", 1, outline_filter(size = 2, color = outline_color))
+
+	//Yes, almost all of these are references to random pieces of media/famous people.
 	switch(weapon_path)
 		if(/obj/item/weapon/gun/flamer)
 			item_to_upgrade.name = "\proper Meltdown"
-			item_to_upgrade.desc = "Things are going to be pretty hot in here soon."
+			item_to_upgrade.desc = SPAN_DANGER("Things are going to be pretty hot in here soon.")
 			item_to_upgrade.set_fire_delay(FIRE_DELAY_TIER_7)
 			item_to_upgrade.gun_firemode_list |= GUN_FIREMODE_AUTOMATIC
+			new /obj/item/ammo_magazine/flamer_tank/high_combustion(loc)
+
 		if(/obj/item/weapon/gun/rifle/m4ra)
 			item_to_upgrade.name = "\proper Recon"
-			item_to_upgrade.desc = "The last thing they'll ever see."
-			item_to_upgrade.damage_mult = 2.5
+			item_to_upgrade.desc = SPAN_DANGER("The last thing they'll ever see.")
+			item_to_upgrade.damage_mult += 0.15
 			item_to_upgrade.ammo_override = /datum/ammo/bullet/rifle/ap/penetrating
-		if(/obj/item/weapon/gun/rifle/m46c/mk1_ammo)
+			if(item_to_upgrade.in_chamber)
+				item_to_upgrade.ready_in_chamber()
+
+		if(/obj/item/weapon/gun/rifle/m46c/horde_mode)
 			item_to_upgrade.name = "\proper Primas"
+			item_to_upgrade.desc = SPAN_DANGER("I lead the way.")
+			item_to_upgrade.ammo_override = /datum/ammo/bullet/rifle/incendiary/napalmx
+			item_to_upgrade.damage_mult += 0.6
+			if(item_to_upgrade.in_chamber)
+				item_to_upgrade.ready_in_chamber()
+
 		if(/obj/item/weapon/gun/lever_action/r4t)
 			item_to_upgrade.name = "\proper Judgement Day"
-			item_to_upgrade.desc = "They forgot to say 'please'."
-			item_to_upgrade.ammo_override = /datum/ammo/bullet/rifle/explosive
-			item_to_upgrade.recoil_unwielded = RECOIL_AMOUNT_TIER_5
-			item_to_upgrade.accuracy_mult_unwielded = BASE_ACCURACY_MULT
-			item_to_upgrade.scatter_unwielded = SCATTER_AMOUNT_TIER_10
+			item_to_upgrade.desc = SPAN_DANGER("They forgot to say please.")
+			item_to_upgrade.ammo_override = /datum/ammo/bullet/rifle/explosive/light
+			item_to_upgrade.recoil_unwielded -= RECOIL_AMOUNT_TIER_2
+			item_to_upgrade.accuracy_mult_unwielded += HIT_ACCURACY_MULT_TIER_10
+			item_to_upgrade.scatter_unwielded -= SCATTER_AMOUNT_TIER_5
+			item_to_upgrade.movement_onehanded_acc_penalty_mult -= 4
+
+		if(/obj/item/weapon/gun/rifle/l42a/abr40)
+			item_to_upgrade.name = "\proper Old Glory"
+			item_to_upgrade.desc = SPAN_DANGER("It has ever been my staunch companion and protection.")
+			item_to_upgrade.damage_mult += 1.5
+			item_to_upgrade.accuracy_mult += HIT_ACCURACY_MULT_TIER_7
+
+		if(/obj/item/weapon/gun/rifle/m41a)
+			item_to_upgrade.name = "\proper Recompense"
+			item_to_upgrade.desc = SPAN_DANGER("Forgive your enemies, but never forget their names.")
+			item_to_upgrade.modify_fire_delay(-0.5)
+			item_to_upgrade.damage_mult += 0.5
+			item_to_upgrade.chance_to_keep_ammo = 33
+
+		if(/obj/item/weapon/gun/rifle/m41aMK1)
+			item_to_upgrade.name = "\proper THIS MACHINE"
+			item_to_upgrade.desc = SPAN_DANGER("KILLS UPP.")
+			item_to_upgrade.set_burst_delay(1)
+			item_to_upgrade.do_toggle_firemode(user, GUN_FIREMODE_BURSTFIRE)
+			item_to_upgrade.remove_firemode(GUN_FIREMODE_SEMIAUTO, user)
+			item_to_upgrade.remove_firemode(GUN_FIREMODE_AUTOMATIC, user)
+
+		if(/obj/item/weapon/gun/shotgun/combat/marsoc)
+			item_to_upgrade.name = "\proper Adjudicator"
+			item_to_upgrade.desc = SPAN_DANGER("Delivering justice one shell at a time.")
+			item_to_upgrade.damage_mult += 0.8
+			item_to_upgrade.accuracy_mult += HIT_ACCURACY_MULT_TIER_10
+			item_to_upgrade.scatter -= SCATTER_AMOUNT_TIER_8
+			item_to_upgrade.ammo_override = /datum/ammo/bullet/shotgun/flechette
+			item_to_upgrade.set_fire_delay(FIRE_DELAY_TIER_10)
+			item_to_upgrade.chance_to_keep_ammo = 50
+			if(item_to_upgrade.in_chamber)
+				item_to_upgrade.ready_in_chamber()
+
+		if(/obj/item/weapon/gun/smg/m39)
+			item_to_upgrade.name = "\proper Big Trouble"
+			item_to_upgrade.desc = SPAN_DANGER("God, aren't you even gonna kiss her goodbye?")
+			item_to_upgrade.modify_fire_delay(-0.25)
+			item_to_upgrade.modify_burst_delay(-0.5)
+			item_to_upgrade.damage_mult += 0.25
+			item_to_upgrade.chance_to_keep_ammo = 50
+			item_to_upgrade.burst_scatter_mult -= 2
+
+		if(/obj/item/weapon/gun/smg/mp5)
+			item_to_upgrade.name = "\proper Detective's Sidearm"
+			item_to_upgrade.desc = SPAN_DANGER("Now you have a machine gun. Ho, ho, ho.")
+			item_to_upgrade.set_fire_delay(FIRE_DELAY_TIER_12)
+			item_to_upgrade.set_burst_delay(FIRE_DELAY_TIER_12)
+			item_to_upgrade.chance_to_keep_ammo = 66
+			item_to_upgrade.burst_scatter_mult -= 2
 
 /////////////////////
 // HOVERING EFFECT //
@@ -561,6 +738,7 @@
 	icon = 'icons/obj/items/weapons/guns/guns_by_faction/uscm.dmi'
 	icon_state = "m41a"
 	pixel_y = 14
+	layer = BELOW_MOB_LAYER
 
 /obj/effect/item_purchase/Initialize(mapload, ...)
 	. = ..()

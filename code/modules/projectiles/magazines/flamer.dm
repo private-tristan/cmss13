@@ -150,6 +150,12 @@
 	max_range = 7
 	max_duration = 50
 
+/obj/item/ammo_magazine/flamer_tank/high_combustion
+	name = "incinerator tank (high-combustion napalm)"
+	desc = "A large fuel tank of high-combustion napalm, an extremely combustable liquid chemical that burns out quickly but inflicts massive burns, for use in the M240-T incinerator unit. Handle with care."
+	caliber = "High-Combustion Napalm Fuel"
+	flamer_chem = "highdamagenapalm"
+
 /obj/item/ammo_magazine/flamer_tank/EX
 	name = "incinerator tank (EX)"
 	desc = "A fuel tank of Ultra Thick Napthal Fuel type EX, a sticky combustible liquid chemical that burns so hot it melts straight through flame-resistant material, for use in the M240-T incinerator unit. Handle with care."

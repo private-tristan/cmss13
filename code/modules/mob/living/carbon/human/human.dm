@@ -140,13 +140,17 @@
 		if(player["mob"] == src)
 			var/list/perk_list = list()
 			if(HAS_TRAIT(src, TRAIT_PERK_JUGGERNAUT))
-				. += "Juggernaut"
+				perk_list += "Juggernaut"
 			if(HAS_TRAIT(src, TRAIT_PERK_SPEED))
-				. += "Speed"
+				perk_list += "Speed"
+			if(HAS_TRAIT(src, TRAIT_PERK_EXPLOSIVE_RESISTANCE))
+				perk_list += "Explosive Resistance"
+			if(HAS_TRAIT(src, TRAIT_PERK_REVIVE))
+				perk_list += "Revive"
 			. += "Points: [player["points"]]"
 			. += "Wave: [SShorde_mode.round]"
 			if(length(perk_list))
-				var/perk_list_text = english_list(perk_list)
+				var/perk_list_text = perk_list.Join(", ")
 				. += "Perks: [perk_list_text]"
 
 			break

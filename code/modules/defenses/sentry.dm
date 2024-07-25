@@ -490,12 +490,14 @@
 		visible_message(SPAN_WARNING("[src] begins to disassemble itself..."))
 		sleep(4 SECONDS)
 		visible_message(SPAN_WARNING("[src] disassembles itself into a neat little package-- which is completely useless to you!"))
+		new /obj/item/prop/disassembled_horde_mode_sentry(loc)
 		qdel(src)
 
 	if(!range_bounds)
 		set_range()
 	for(var/mob/living/simple_animal/hostile/alien/horde_mode/enemy in range(sentry_range, src))
-		targets += enemy
+		if(enemy.faction != FACTION_MARINE)
+			targets += enemy
 	if(!targets)
 		return FALSE
 
@@ -525,6 +527,16 @@
 
 	return
 
+/obj/item/prop/disassembled_horde_mode_sentry
+	name = "disassembled disposable UA 571-C sentry gun"
+	desc = "Well, it's of no use to you now."
+	icon = 'icons/obj/structures/props/almayer_props.dmi'
+	icon_state = "hangar_comp"
+
+/obj/item/prop/disassembled_horde_mode_sentry/Initialize(mapload, ...)
+	. = ..()
+	QDEL_IN(src, 5 SECONDS)
+	animate(src, 5 SECONDS, alpha = 0, easing = CUBIC_EASING)
 
 /obj/structure/machinery/defenses/sentry/premade
 	name = "\improper UA-577 Gauss Turret"

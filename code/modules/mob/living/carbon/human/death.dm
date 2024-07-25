@@ -44,6 +44,12 @@
 	if(stat == DEAD)
 		species?.handle_dead_death(src, gibbed)
 		return
+	if(HAS_TRAIT(src, TRAIT_PERK_REVIVE))
+		rejuvenate()
+		to_chat(src, SPAN_USERDANGER("You feel your heart fading... but then it kicks into overdrive! You've got another chance!"))
+		playsound_client(src.client, 'sound/effects/heart_beat_short_intense.ogg', 80)
+		REMOVE_TRAIT(src, TRAIT_PERK_REVIVE, PERK_TRAIT)
+		return
 
 	GLOB.alive_human_list -= src
 
@@ -131,5 +137,5 @@
 	else if(death_data?.cause_name == "existing")
 		// Corpses spawn as gibbed true to avoid sfx, even though they aren't actually gibbed...
 		AddComponent(/datum/component/weed_food)
-	
+
 	update_execute_hud()

@@ -1035,7 +1035,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 		setup_human(spawned_marine, player, FALSE)
 		arm_equipment(spawned_marine, /datum/equipment_preset/uscm/horde_mode_marine, FALSE, TRUE)
 
-		SShorde_mode.current_players += list(list("mob" = spawned_marine, "points" = 500))
+		SShorde_mode.current_players += list(list("mob" = spawned_marine, "points" = 9000))
 		spawned_marine.pain = new /datum/pain/human_hero()
 		spawned_marine.status_flags |= NO_PERMANENT_DAMAGE
 

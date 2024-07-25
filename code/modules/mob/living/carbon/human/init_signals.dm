@@ -8,6 +8,9 @@
 	RegisterSignal(src, SIGNAL_ADDTRAIT(TRAIT_PERK_EXPLOSIVE_RESISTANCE), PROC_REF(on_perk_explosive_resistance_gain))
 	RegisterSignal(src, SIGNAL_REMOVETRAIT(TRAIT_PERK_EXPLOSIVE_RESISTANCE), PROC_REF(on_perk_explosive_resistance_loss))
 
+	RegisterSignal(src, SIGNAL_ADDTRAIT(TRAIT_PERK_REVIVE), PROC_REF(on_perk_revive_gain))
+	RegisterSignal(src, SIGNAL_REMOVETRAIT(TRAIT_PERK_REVIVE), PROC_REF(on_perk_revive_loss))
+
 /mob/living/carbon/human/proc/on_perk_juggernaut_gain(datum/source)
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("You heartbeat seems stronger."))
@@ -37,3 +40,11 @@
 /mob/living/carbon/human/proc/on_perk_explosive_resistance_loss(datum/source)
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("Your body feels squisher."))
+
+/mob/living/carbon/human/proc/on_perk_revive_gain(datum/source)
+	SIGNAL_HANDLER
+	to_chat(src, SPAN_ALERTWARNING("You feel like you have another chance at life."))
+
+/mob/living/carbon/human/proc/on_perk_revive_loss(datum/source)
+	SIGNAL_HANDLER
+	to_chat(src, SPAN_ALERTWARNING("You doubt you'll get another chance like that."))

@@ -196,6 +196,7 @@
 	can_hold = list(
 		/obj/item/stack/medical/ointment,
 		/obj/item/reagent_container/hypospray/autoinjector,
+		/obj/item/horde_mode/stim,
 		/obj/item/storage/pill_bottle/packet,
 		/obj/item/stack/medical/bruise_pack,
 		/obj/item/stack/medical/splint,

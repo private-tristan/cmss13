@@ -53,7 +53,10 @@
 	/**How the bullet will behave once it leaves the gun, also used for basic bullet damage and effects, etc.
 	Ammo will be replaced on New() for things that do not use mags.**/
 	var/datum/ammo/ammo = null
+	///If set, the fired bullet will ALWAYS be of this type, even if the gun has something else loaded.
 	var/datum/ammo/ammo_override = null
+	///% chance to not subtract ammo from the magazine when firing.
+	var/chance_to_keep_ammo = 0
 	///What is currently in the chamber. Most guns will want something in the chamber upon creation.
 	var/obj/projectile/in_chamber = null
 	/*Ammo mags may or may not be internal, though the difference is a few additional variables. If they are not internal, don't call
@@ -1013,7 +1016,8 @@ and you're good to go.
 	if(current_mag && current_mag.current_rounds > 0)
 		in_chamber = create_bullet(ammo, initial(name))
 		apply_traits(in_chamber)
-		current_mag.current_rounds-- //Subtract the round from the mag.
+		if(!prob(chance_to_keep_ammo))
+			current_mag.current_rounds-- //Subtract the round from the mag.
 		return in_chamber
 
 

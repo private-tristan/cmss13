@@ -4,16 +4,17 @@
 	health = XENO_HEALTH_TIER_3
 	melee_damage_lower = XENO_DAMAGE_TIER_2
 	melee_damage_upper = XENO_DAMAGE_TIER_3
-	melee_damage_multiplier = 3
+	melee_damage_taken_multiplier = 3
 	move_to_delay = 4
 	icon_size = 48
 	var/explosive_damage_multiplier = 1.5
+	var/fire_damage_multiplier = 1
 	///Used for tracking which mob hit this xeno last, so we can reward them points accordingly.
 	var/mob/living/last_hit_by
 	///Used for giving extra points on death, mainly for melee kills. Will be overridden to 0 if shot by a bullet.
 	var/death_bonus = 0
 	///How many points do you get for killing them?
-	var/kill_reward = 100
+	var/kill_reward = 150
 
 /mob/living/simple_animal/hostile/alien/horde_mode/Initialize()
 	. = ..()
@@ -31,6 +32,13 @@
 	else
 		target_mob = SShorde_mode.return_random_player()
 	MoveToTarget()
+
+/mob/living/simple_animal/hostile/alien/horde_mode/Collide(atom/movable/AM)
+	if(..())
+		return
+	if(mob_size > MOB_SIZE_XENO_VERY_SMALL)
+		now_pushing = FALSE
+	return
 
 /mob/living/simple_animal/hostile/alien/horde_mode/Life(delta_time)
 	handle_fire()
@@ -50,7 +58,7 @@
 	if(..())
 		return
 
-	health -= fire_reagent.intensityfire * 0.5
+	health -= fire_reagent.intensityfire * fire_damage_multiplier
 	var/mob/player_mob = last_damage_data.resolve_mob()
 	last_hit_by = player_mob
 	if(stat != DEAD)
@@ -142,64 +150,16 @@
 			apply_effect(knock_value, PARALYZE)
 			explosion_throw(severity, direction)
 
+/mob/living/simple_animal/hostile/alien/horde_mode/make_jittery(amount)
+	if(stat == DEAD) return //dead humans can't jitter
+	jitteriness = min(1000, jitteriness + amount) // store what will be new value
+													// clamped to max 1000
+	if(jitteriness > 100 && !is_jittery)
+		INVOKE_ASYNC(src, PROC_REF(jittery_process))
 
-/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone
-	name = "Lesser Drone"
-	icon = 'icons/mob/xenos/lesser_drone.dmi'
-	desc = "An alien drone. Looks... smaller."
-	health = XENO_HEALTH_LESSER_DRONE
-	melee_damage_lower = XENO_DAMAGE_TIER_1
-	melee_damage_upper = XENO_DAMAGE_TIER_2
-	move_to_delay = 3.5
-	pixel_x = 0
-	icon_size = 32
-	kill_reward = 50
 
-/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone/update_wounds()
-	return
-
-/mob/living/simple_animal/hostile/alien/horde_mode/runner
-	name = "Runner"
-	desc = "A fast, four-legged terror, but weak in sustained combat."
-	icon = 'icons/mob/xenos/runner.dmi'
-	icon_size = 64
-	pixel_x = -16  //Needed for 2x2
-	old_x = -16
-	base_pixel_x = 0
-	base_pixel_y = -20
-	move_to_delay = 2.5
-	health = XENO_HEALTH_RUNNER
-	kill_reward = 125
-
-/mob/living/simple_animal/hostile/alien/horde_mode/lurker
-	name = "Lurker"
-	desc = "A beefy, fast alien with sharp claws."
-	icon = 'icons/mob/xenos/lurker.dmi'
-	alpha = 60
-	melee_damage_lower = XENO_DAMAGE_TIER_3
-	melee_damage_upper = XENO_DAMAGE_TIER_4
-	health = XENO_HEALTH_TIER_5
-	move_to_delay = 3.8
-	kill_reward = 150
-
-/mob/living/simple_animal/hostile/alien/horde_mode/warrior
-	name = "Warrior"
-	desc = "A beefy alien with an armored carapace."
-	icon = 'icons/mob/xenos/warrior.dmi'
-	melee_damage_lower = XENO_DAMAGE_TIER_4
-	melee_damage_upper = XENO_DAMAGE_TIER_4
-	health = XENO_HEALTH_TIER_5
-	kill_reward = 175
-	COOLDOWN_DECLARE(fling_cooldown)
-
-/mob/living/simple_animal/hostile/alien/horde_mode/warrior/AttackingTarget()
-	if(Adjacent(target_mob) && prob(75) && COOLDOWN_FINISHED(src, fling_cooldown) && target_mob.mob_size < MOB_SIZE_BIG)
-		COOLDOWN_START(src, fling_cooldown, 16 SECONDS)
-		fling(target_mob)
-		return
-
-	. = ..()
-
+//FLINGING PROCS
+////////////////
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/fling(mob/living/target, fling_distance = 5, ravaging_attack = FALSE)
 	if(body_position == LYING_DOWN || !Adjacent(target) || target.mob_size >= MOB_SIZE_BIG)
 		return
@@ -240,15 +200,27 @@
 	if(shake_camera)
 		shake_camera(target, 10, 1)
 
+
+//TURN INTO CORRUPTED
+/////////////////////
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/turn_corrupt()
 	make_jittery(105)
 	sleep(1 SECONDS)
 
 	LoseTarget()
 
-	visible_message(SPAN_XENOHIGHDANGER("[src] falls to the ground, its limbs and head twitching erraditacally in horrid pain!"))
+	visible_message(SPAN_XENOHIGHDANGER("[src] falls to the ground, its limbs and head twitching erradically in horrid pain!"))
 	playsound(loc, "alien_help", 25, 1)
 	manual_emote("writhes in pain!")
+	animate(src, time = 4 SECONDS, easing = QUAD_EASING, color = "#80ff80")
+	if(!istype(src, /mob/living/simple_animal/hostile/alien/horde_mode/boss))
+		apply_effect(8, WEAKEN)
+		apply_effect(8, PARALYZE)
+		sleep(3 SECONDS)
+		visible_message(SPAN_DANGER("[src] is unable to endure the transformation process..."))
+		addtimer(CALLBACK(src, PROC_REF(death), create_cause_data("cipher stim"), 3 SECONDS))
+		return
+
 	melee_damage_upper *= 2
 	melee_damage_lower *= 2
 	move_to_delay *= 0.8
@@ -265,41 +237,77 @@
 	faction_group = FACTION_LIST_MARINE
 	attack_same = FALSE
 	hivenumber = XENO_HIVE_CORRUPTED
-	animate(src, time = 4 SECONDS, easing = QUAD_EASING, color = "#80ff80")
 	name = "Corrupted [initial(name)] (XX-[rand(1, 999)])"
 
 
-/mob/living/simple_animal/hostile/alien/horde_mode/make_jittery(amount)
-	if(stat == DEAD) return //dead humans can't jitter
-	jitteriness = min(1000, jitteriness + amount) // store what will be new value
-													// clamped to max 1000
-	if(jitteriness > 100 && !is_jittery)
-		INVOKE_ASYNC(src, PROC_REF(jittery_process))
+//LESSER DRONE
+//////////////
+/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone
+	name = "Lesser Drone"
+	icon = 'icons/mob/xenos/lesser_drone.dmi'
+	desc = "An alien drone. Looks... smaller."
+	health = XENO_HEALTH_LESSER_DRONE
+	melee_damage_lower = XENO_DAMAGE_TIER_1
+	melee_damage_upper = XENO_DAMAGE_TIER_2
+	move_to_delay = 3.5
+	pixel_x = 0
+	icon_size = 32
+	kill_reward = 100
+
+/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone/update_wounds()
+	return
 
 
-/obj/item/cipher_stim
-	name = "cipher stim"
-	icon = 'icons/obj/items/syringe.dmi'
-	icon_state = "stimpack"
-	w_class = 1
+//RUNNER
+////////
+/mob/living/simple_animal/hostile/alien/horde_mode/runner
+	name = "Runner"
+	desc = "A fast, four-legged terror, but weak in sustained combat."
+	icon = 'icons/mob/xenos/runner.dmi'
+	icon_size = 64
+	pixel_x = -16  //Needed for 2x2
+	old_x = -16
+	base_pixel_x = 0
+	base_pixel_y = -20
+	move_to_delay = 2.5
+	health = XENO_HEALTH_RUNNER
+	kill_reward = 175
 
-/obj/item/cipher_stim/Initialize(mapload, ...)
-	. = ..()
-	var/image/overlay_image = image(icon, icon_state = "+stimpack_custom")
-	overlay_image.color = "#80ff80"
-	overlays += overlay_image
+//LURKER
+////////
+/mob/living/simple_animal/hostile/alien/horde_mode/lurker
+	name = "Lurker"
+	desc = "A beefy, fast alien with sharp claws."
+	icon = 'icons/mob/xenos/lurker.dmi'
+	alpha = 60
+	melee_damage_lower = XENO_DAMAGE_TIER_3
+	melee_damage_upper = XENO_DAMAGE_TIER_4
+	health = XENO_HEALTH_TIER_5
+	move_to_delay = 3.8
+	kill_reward = 200
 
-/obj/item/cipher_stim/attack(mob/living/target, mob/living/user)
-	if(!istype(target, /mob/living/simple_animal/hostile/alien/horde_mode/boss))
+//WARRIOR
+////////
+/mob/living/simple_animal/hostile/alien/horde_mode/warrior
+	name = "Warrior"
+	desc = "A beefy alien with an armored carapace."
+	icon = 'icons/mob/xenos/warrior.dmi'
+	melee_damage_lower = XENO_DAMAGE_TIER_4
+	melee_damage_upper = XENO_DAMAGE_TIER_4
+	health = XENO_HEALTH_TIER_5
+	kill_reward = 225
+	COOLDOWN_DECLARE(fling_cooldown)
+
+/mob/living/simple_animal/hostile/alien/horde_mode/warrior/AttackingTarget()
+	if(Adjacent(target_mob) && prob(75) && COOLDOWN_FINISHED(src, fling_cooldown) && target_mob.mob_size < MOB_SIZE_BIG)
+		COOLDOWN_START(src, fling_cooldown, 16 SECONDS)
+		fling(target_mob)
 		return
 
-	to_chat(user, SPAN_DANGER("You inject [target] with [src]!"))
-	var/mob/living/simple_animal/hostile/alien/horde_mode/boss/xeno = target
-	playsound(loc, 'sound/items/air_release.ogg', 75)
-	overlays = null
-	icon_state = "stimpack0"
-	xeno.turn_corrupt()
+	. = ..()
 
+//BOSS ENEMIES
+//////////////
 /mob/living/simple_animal/hostile/alien/horde_mode/boss
 	name = "Praetorian"
 	desc = "A huge, looming beast of an alien."
@@ -311,7 +319,7 @@
 	melee_damage_upper = XENO_DAMAGE_TIER_5
 	health = XENO_HEALTH_QUEEN
 	move_to_delay = 4.5
-	kill_reward = 1000
+	kill_reward = 3000
 	mob_size = MOB_SIZE_BIG
 	explosive_damage_multiplier = 0.25
 	COOLDOWN_DECLARE(first_ability)
@@ -336,10 +344,27 @@
 			INVOKE_ASYNC(src, PROC_REF(second_ability))
 		if(COOLDOWN_FINISHED(src, third_ability))
 			INVOKE_ASYNC(src, PROC_REF(third_ability))
-		if(COOLDOWN_FINISHED(src, fourth_ability))
+		if(COOLDOWN_FINISHED(src, fourth_ability) && Adjacent(target_mob))
 			INVOKE_ASYNC(src, PROC_REF(fourth_ability))
 
 	. = ..()
+
+/mob/living/simple_animal/hostile/alien/horde_mode/boss/Initialize()
+	. = ..()
+	RegisterSignal(src, COMSIG_MOVABLE_PRE_MOVE, PROC_REF(check_block))
+
+/mob/living/simple_animal/hostile/alien/horde_mode/initialize_pass_flags(datum/pass_flags_container/PF)
+	..()
+	if (PF)
+		PF.flags_pass = PASS_MOB_IS_OTHER
+		PF.flags_can_pass_all = PASS_MOB_THRU_OTHER|PASS_AROUND|PASS_HIGH_OVER_ONLY
+
+/mob/living/simple_animal/hostile/alien/horde_mode/boss/proc/check_block(mob/queen, turf/new_loc)
+	SIGNAL_HANDLER
+	for(var/mob/living/simple_animal/hostile/alien/horde_mode/xeno in new_loc.contents)
+		if(xeno.hivenumber == hivenumber)
+			xeno.KnockDown((5 DECISECONDS))
+			playsound(src, 'sound/weapons/alien_knockdown.ogg', 25, 1)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/AttackingTarget()
 	if(!Adjacent(target_mob))
@@ -352,7 +377,7 @@
 
 	if(isliving(target_mob))
 		var/mob/living/target = target_mob
-		if(prob(50))
+		if(prob(50) || target.body_position == LYING_DOWN)
 			INVOKE_ASYNC(src, PROC_REF(ravaging_attack), target)
 		else
 			target.attack_animal(src)
@@ -362,6 +387,7 @@
 		return target
 
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/proc/ravaging_attack(mob/living/target)
+	attacktext = "tears into"
 	for(var/times_to_attack = pick(2, 3, 4), times_to_attack > 0, times_to_attack--)
 		if(Adjacent(target) && target.stat == CONSCIOUS)
 			target.attack_animal(src)
@@ -369,6 +395,7 @@
 			src.flick_attack_overlay(target, "slash")
 			playsound(loc, "alien_claw_flesh", 25, 1)
 			sleep(0.35 SECONDS)
+	attacktext = initial(attacktext)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/proc/first_ability()
 	if(Adjacent(target_mob))
