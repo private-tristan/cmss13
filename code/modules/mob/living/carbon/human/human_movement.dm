@@ -85,8 +85,8 @@
 	if(slowed && !superslowed)
 		. += HUMAN_SLOWED_AMOUNT
 
-	if(extra_movement_delay_modifier)
-		. += extra_movement_delay_modifier
+	if(extra_move_delay_modifier)
+		. += extra_move_delay_modifier
 
 	. += CONFIG_GET(number/human_delay)
 	var/list/movedata = list("move_delay" = .)

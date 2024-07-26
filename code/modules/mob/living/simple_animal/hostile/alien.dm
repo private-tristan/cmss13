@@ -1,3 +1,4 @@
+
 /mob/living/simple_animal/hostile/alien
 	name = "Drone"
 	var/caste_name = null
@@ -178,7 +179,7 @@
 	old_x = -12
 
 // Still using old projectile code - commenting this out for now
-// /mob/living/simple_animal/hostile/alien/sentinel
+//  s/alien/sentinel
 // name = "alien sentinel"
 // icon_state = "Sentinel Running"
 // icon_living = "Sentinel Running"

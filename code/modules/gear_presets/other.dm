@@ -975,7 +975,7 @@
 	rank = JOB_MARINE
 	paygrade = "ME2"
 	role_comm_title = "RFN"
-	skills = /datum/skills/pfc/crafty
+	skills = /datum/skills/pfc/horde_mode
 	minimap_icon = "private"
 
 /datum/equipment_preset/uscm/horde_mode_marine/load_gear(mob/living/carbon/human/new_human)

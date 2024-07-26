@@ -158,6 +158,18 @@
 			return FALSE
 	..()
 
+///HORDE MODE PROJECTILE DO NOT USE FOR ACTUAL XENOS
+/datum/ammo/xeno/acid/neuro
+	name = "acidic neurotoxin spit"
+	icon_state = "neurotoxin"
+	ping = "ping_x"
+
+/datum/ammo/xeno/acid/neuro/on_hit_mob(mob/hit_mob, obj/projectile/P)
+	if(ishuman(hit_mob))
+		hit_mob.visible_message(SPAN_DANGER("[hit_mob]'s movements are slowed."))
+		hit_mob.apply_effect(0.5, SLOW)
+	..()
+
 /datum/ammo/xeno/acid/spatter
 	name = "acid spatter"
 

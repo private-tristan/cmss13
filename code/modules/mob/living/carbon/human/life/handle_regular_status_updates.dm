@@ -51,7 +51,7 @@
 				playsound_client(src.client, 'sound/effects/heart_beat_short_intense.ogg', 80)
 				REMOVE_TRAIT(src, TRAIT_PERK_REVIVE, PERK_TRAIT)
 				return
-			if(!HAS_TRAIT(src, TRAIT_PERK_REVIVE))
+			else
 				var/already_in_crit = FALSE
 				for(var/datum/effects/crit/C in effects_list)
 					already_in_crit = TRUE

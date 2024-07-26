@@ -172,7 +172,7 @@
 	name = "\improper advanced medical equipment"
 	icon_state = "closed_medical"
 	custom_hovering_icon = /obj/item/storage/firstaid/adv
-	primary_purchase = /obj/item/horde_mode/stim/healing
+	primary_purchase = /obj/item/horde_mode/stim/injector/healing
 	primary_cost = 600
 
 ///////////////
@@ -436,6 +436,7 @@
 	var/mob/living/last_used_by
 	var/is_spinning = FALSE
 	var/can_refund = TRUE
+	var/cost_increase = 1
 	///The proper icon_state for the object. Uses the icons in crates.dmi without the closed_ or open_ prefix.
 	var/crate_variant = "woodcrate"
 
@@ -446,7 +447,7 @@
 
 /obj/structure/mystery_purchase/get_examine_text(mob/user)
 	. = ..()
-	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to get a random item for [cost] points.")
+	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to get a random item for [round(cost * cost_increase, 5)] points.")
 	if(can_refund)
 		. += SPAN_NOTICE("Don't like the item? Use <b>DISARM INTENT</b> to get half of your points back.")
 	else
@@ -464,7 +465,7 @@
 			refund_item(user)
 			return
 
-	if(!SShorde_mode.handle_purchase(user, cost) || user.a_intent != INTENT_HELP)
+	if(!SShorde_mode.handle_purchase(user, round(cost * cost_increase, 5)) || user.a_intent != INTENT_HELP)
 		return
 
 	last_used_by = user
@@ -477,7 +478,7 @@
 	sleep(0.25 SECONDS)
 	icon_state = "open_[crate_variant]"
 	sleep(0.25 SECONDS)
-	for(var/i = 0, i < 17, i++)
+	for(var/i = 0, i < 16, i++)
 		var/obj/item/random_item = pick(pick(low_tier_gear), pick(med_tier_gear), pick(high_tier_gear))
 		hovering_effect.icon = random_item.icon
 		hovering_effect.icon_state = random_item.icon_state
@@ -531,6 +532,7 @@
 	hovering_effect.icon = initial(hovering_effect.icon)
 	hovering_effect.icon_state = initial(hovering_effect.icon_state)
 	hovering_effect.alpha = 255
+	hovering_effect.overlays = null
 	hovering_effect.transition_filter("outline", list(color = COLOR_WHITE), 0.25 SECONDS, QUAD_EASING)
 	icon_state = "closed_[crate_variant]"
 
@@ -548,11 +550,14 @@
 	desc = "They're not weapons, but they could be just as good as guns."
 	icon_state = "closed_ammo_alt"
 	crate_variant = "ammo_alt"
-	high_tier_gear = list(/obj/item/horde_mode/stim/cipher)
-	med_tier_gear = list(/obj/item/horde_mode/stim/healing/speed)
-	low_tier_gear = list(/obj/item/horde_mode/stim/healing)
+	high_tier_gear = list(/obj/item/horde_mode/stim/cipher, /obj/item/weapon/shield/riot/metal, /obj/item/stack/medical/advanced/ointment/upgraded, /obj/item/stack/medical/advanced/bruise_pack/upgraded, /obj/item/horde_mode/stim/injector/stat_mod/speed, /obj/item/horde_mode/stim/injector/stat_mod/health)
+	med_tier_gear = list(/obj/item/horde_mode/stim/injector/speed, /obj/item/horde_mode/stim/injector/max_health)
+	low_tier_gear = list(/obj/item/horde_mode/stim/injector/healing, /obj/item/stack/medical/advanced/bruise_pack, /obj/item/stack/medical/advanced/ointment)
 	cost = 500
-	can_refund = FALSE
+
+/obj/structure/mystery_purchase/goodies/get_examine_text(mob/user)
+	. = ..()
+	. += SPAN_BOLDWARNING("The price of opening this box will increase by 10% points every time you pick up an item.")
 
 /obj/structure/mystery_purchase/goodies/mystery_purchase_effect()
 	is_spinning = TRUE
@@ -560,33 +565,34 @@
 	sleep(0.25 SECONDS)
 	icon_state = "open_[crate_variant]"
 	sleep(0.25 SECONDS)
-	for(var/i = 0, i < 17, i++)
+	for(var/i = 0, i < 16, i++)
 		var/obj/item/random_item = pick(pick(low_tier_gear), pick(med_tier_gear), pick(high_tier_gear))
 		hovering_effect.overlays = null
 		hovering_effect.icon = random_item.icon
 		hovering_effect.icon_state = random_item.icon_state
-
-		if(ispath(random_item, /obj/item/horde_mode/stim))
-			var/obj/item/horde_mode/stim/picked_stim = random_item
-			var/image/reagent_image = image(picked_stim.icon, icon_state = picked_stim.reagent_image_fill)
-			reagent_image.color = picked_stim.reagent_color
-			hovering_effect.overlays += reagent_image
-
+		set_item_overlay(random_item)
 		sleep(0.3 SECONDS)
 
 	is_spinning = FALSE
+	hovering_effect.overlays = null
 	hovering_effect.name = picked_item.name
 	hovering_effect.desc = picked_item.desc
 	hovering_effect.icon = picked_item.icon
 	hovering_effect.icon_state = picked_item.icon_state
 	hovering_effect.transition_filter("outline", list(color = COLOR_YELLOW), 0.25 SECONDS, QUAD_EASING)
+	set_item_overlay(picked_item)
 	INVOKE_ASYNC(src, PROC_REF(blink_effect))
 
+/obj/structure/mystery_purchase/goodies/proc/set_item_overlay(obj/item/random_item)
+	if(ispath(random_item, /obj/item/horde_mode/stim))
+		var/obj/item/horde_mode/stim/picked_stim = random_item
+		var/image/reagent_image = image(picked_stim.icon, icon_state = picked_stim.reagent_image_fill)
+		reagent_image.color = picked_stim.reagent_color
+		hovering_effect.overlays += reagent_image
 
-
-/obj/item/horde_mode/stim/Initialize(mapload, ...)
+/obj/structure/mystery_purchase/goodies/pick_up_item(mob/user)
 	. = ..()
-
+	cost_increase += 0.1
 
 // Weapon mystery box
 /////////////////////
@@ -604,9 +610,9 @@
 	var/ammo_to_give = purchased_gun.current_mag.type
 	var/amount_to_give
 
-	if(purchased_gun in high_tier_gear)
+	if(purchased_gun.type in high_tier_gear)
 		amount_to_give = 1
-	if(purchased_gun in med_tier_gear)
+	if(purchased_gun.type in med_tier_gear)
 		amount_to_give = 2
 	else
 		amount_to_give = 3

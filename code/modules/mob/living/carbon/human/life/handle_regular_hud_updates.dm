@@ -94,7 +94,7 @@
 								else hud_used.healths.icon_state = "health0"
 						else
 							///This variable represents the mob's current health (taking into account if their max health is more than 100).
-							var/actual_health = (health * species.total_health / 100)
+							var/actual_health = health / species.total_health
 							if(actual_health < 0.2)
 								hud_used.healths.icon_state = "health6"
 							else if(actual_health >= 0.2 && actual_health < 0.4)

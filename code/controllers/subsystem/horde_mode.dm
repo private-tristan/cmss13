@@ -11,17 +11,24 @@ SUBSYSTEM_DEF(horde_mode)
 	var/list/spawnable_xenos = list(
 		/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone
 	)
+	var/list/spawnable_specialists = list()
 	var/list/spawnable_bosses = list()
 	var/list/corrupted_xenos = list()
 	var/spawn_max = 2
 	var/amount_to_spawn = 5
 	var/bosses_to_spawn = 0
+	var/max_specialists = 0
+	var/specialists_to_spawn = 0
+	var/spawn_wave = 2
+
 	var/round = 1
 	var/round_ended = FALSE
-	var/xeno_health_mod = 0.35
-	var/xeno_damage_mod = 0.5
 	var/intro_played = TRUE
-	var/spawn_wave = 2
+
+	var/xeno_health_mod = 0.35
+	var/xeno_damage_mod = 0.5 // DOES NOT AFFECT RANGED ATTACKS
+
+
 	var/max_sentries = 2
 	var/sentries_active = 0
 	var/list/new_round_sound = list('sound/voice/alien_distantroar_3.ogg','sound/voice/xenos_roaring.ogg', 'sound/voice/4_xeno_roars.ogg')
@@ -46,7 +53,7 @@ SUBSYSTEM_DEF(horde_mode)
 		world << sound(new_round_sound)
 
 	if(!amount_to_spawn && !length(current_xenos) && !round_ended)
-		COOLDOWN_START(src, round_cooldown, (12 + round) SECONDS)
+		COOLDOWN_START(src, round_cooldown, (20 + round) SECONDS)
 		round_ended = TRUE
 		send_player_message(SPAN_HIGHDANGER("Seems like the horde has died down... Take a breather and ready yourself for the next one."))
 
@@ -56,33 +63,38 @@ SUBSYSTEM_DEF(horde_mode)
 		increment_round()
 
 	if(bosses_to_spawn > 0)
-		var/spawn_loc = SAFEPICK(xeno_spawns)
-		var/mob_type = pick(spawnable_bosses)
-		if(isnull(spawn_loc))
-			return
-		new mob_type(spawn_loc)
+		spawn_xeno(spawnable_bosses)
 		bosses_to_spawn--
 
 	for(spawn_wave, spawn_wave > 0, spawn_wave--)
 		if(length(current_xenos) < spawn_max && amount_to_spawn != 0)
-			var/spawn_loc = SAFEPICK(xeno_spawns)
-			var/mob_type = pick(spawnable_xenos)
-			if(isnull(spawn_loc))
-				return
-			new mob_type(spawn_loc)
-			amount_to_spawn--
+			if(specialists_to_spawn != 0 && prob(33))
+				spawn_xeno(spawnable_specialists)
+				specialists_to_spawn--
+			else
+				spawn_xeno(spawnable_xenos)
+				amount_to_spawn--
+
 	spawn_wave = clamp(round, 1, 6)
+
+/datum/controller/subsystem/horde_mode/proc/spawn_xeno(xeno_type)
+	var/spawn_loc = SAFEPICK(xeno_spawns)
+	var/mob_type = pick(xeno_type)
+	if(isnull(spawn_loc))
+		return
+	new mob_type(spawn_loc)
 
 /datum/controller/subsystem/horde_mode/proc/increment_round(times = 1)
 	for(times, times > 0, times--)
 		round++
+		handle_new_xenos()
 		xeno_health_mod += 0.025
 		xeno_damage_mod += 0.025
 		amount_to_spawn = 3*round+2
+		specialists_to_spawn = max_specialists
 		if(spawn_max < initial(spawn_max) + 3 + length(current_players))
 			spawn_max++
 		round_ended = FALSE
-		handle_new_xenos()
 
 /datum/controller/subsystem/horde_mode/proc/handle_new_xenos()
 	if(round == 2)
@@ -94,10 +106,22 @@ SUBSYSTEM_DEF(horde_mode)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/lurker)
 		spawnable_xenos.Remove(/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone)
 		send_player_message(SPAN_XENOHIGHDANGER("The air seems to shimmer around you... or is it just your imagination?"))
+	if(round == 7)
+		spawnable_specialists.Add(/mob/living/simple_animal/hostile/alien/horde_mode/ranged/sentinel)
+		max_specialists = 3
+		send_player_message(SPAN_XENOHIGHDANGER("A dizzying vapour overcomes you..."))
 	if(round == 8)
-		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/warrior)
-		send_player_message(SPAN_XENOHIGHDANGER("You start hearing bloodcurdling roars in the distance..."))
+		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/defender)
+		send_player_message(SPAN_XENOHIGHDANGER("You start hearing loud thumps in the distance..."))
 	if(round == 10)
+		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/ranged/spitter)
+		max_specialists = 4
+		send_player_message(SPAN_XENOHIGHDANGER("Noxious fumes begin to assault your senses..."))
+	if(round == 12)
+		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/warrior)
+		max_specialists = 6
+		send_player_message(SPAN_XENOHIGHDANGER("You start hearing bloodcurdling roars in the distance..."))
+	if(round == 14)
 		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
 		bosses_to_spawn++
 		send_player_message(SPAN_XENOHIGHDANGER("You hear menacing stomps in the distance..."))

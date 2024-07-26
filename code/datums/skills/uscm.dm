@@ -15,6 +15,12 @@ United States Colonial Marines
 		SKILL_ENGINEER = SKILL_ENGINEER_TRAINED,
 	)
 
+/datum/skills/pfc/horde_mode
+	name = "Stranded Marine"
+	skills = list(
+		SKILL_MEDICAL = SKILL_MEDICAL_MEDIC
+	)
+
 /datum/skills/combat_medic
 	name = "Combat Medic"
 	skills = list(
