@@ -67,7 +67,7 @@
 
 /obj/item/weapon/gun/energy/emp_act(severity)
 	. = ..()
-	cell.use(round(cell.maxcharge / severity))
+	cell.use(floor(cell.maxcharge / severity))
 	update_icon()
 
 /obj/item/weapon/gun/energy/load_into_chamber()
@@ -268,6 +268,7 @@
 
 
 /datum/action/item_action/taser/action_activate()
+	. = ..()
 	var/obj/item/weapon/gun/energy/taser/taser = holder_item
 	if(!ishuman(owner))
 		return

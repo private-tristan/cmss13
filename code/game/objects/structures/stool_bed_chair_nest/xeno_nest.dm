@@ -114,8 +114,7 @@
 			playsound(loc, "alien_resin_move", 50)
 			if(ishuman(buckled_mob))
 				var/mob/living/carbon/human/H = buckled_mob
-				user.attack_log += "\[[time_stamp()]\]<font color='orange'> Unnested [key_name(H)] at [get_location_in_text(H)]</font>"
-				H.attack_log += "\[[time_stamp()]\]<font color='orange'> Unnested by [key_name(user)] at [get_location_in_text(H)]</font>"
+				log_interact(user, H, "[key_name(user)] unnested [key_name(H)] at [get_area_name(loc)]")
 			unbuckle()
 			return
 		if(is_sharp(W))
@@ -128,8 +127,7 @@
 			playsound(loc, "alien_resin_move", 50)
 			if(ishuman(buckled_mob))
 				var/mob/living/carbon/human/H = buckled_mob
-				user.attack_log += "\[[time_stamp()]\]<font color='orange'> Unnested [key_name(H)] at [get_location_in_text(H)]</font>"
-				H.attack_log += "\[[time_stamp()]\]<font color='orange'> Unnested by [key_name(user)] at [get_location_in_text(H)]</font>"
+				log_interact(user, H, "[key_name(user)] unnested [key_name(H)] at [get_area_name(loc)]")
 			unbuckle()
 			return
 	health = max(0, health - W.force)
@@ -178,8 +176,9 @@
 	playsound(loc, "alien_resin_move", 50)
 	if(ishuman(buckled_mob))
 		var/mob/living/carbon/human/H = buckled_mob
-		user.attack_log += "\[[time_stamp()]\]<font color='orange'> Unnested [key_name(H)] at [get_location_in_text(H)]</font>"
-		H.attack_log += "\[[time_stamp()]\]<font color='orange'> Unnested by [key_name(user)] at [get_location_in_text(H)]</font>"
+		if(isxeno(user))
+			msg_admin_niche("[key_name(user)] unnested [key_name(H)] at [get_location_in_text(H)] [ADMIN_JMP(loc)]")
+		log_interact(user, H, "[key_name(user)] unnested [key_name(H)] at [get_area_name(loc)]")
 	unbuckle()
 	return
 
@@ -246,6 +245,7 @@
 
 	do_buckle(mob, user)
 	ADD_TRAIT(mob, TRAIT_NESTED, TRAIT_SOURCE_BUCKLE)
+	ADD_TRAIT(mob, TRAIT_NO_STRAY, TRAIT_SOURCE_BUCKLE)
 	SEND_SIGNAL(mob, COMSIG_MOB_NESTED, user)
 
 	if(!human)
@@ -276,6 +276,7 @@
 	buckled_mob.pixel_y = 0
 	buckled_mob.old_y = 0
 	REMOVE_TRAIT(buckled_mob, TRAIT_NESTED, TRAIT_SOURCE_BUCKLE)
+	REMOVE_TRAIT(buckled_mob, TRAIT_NO_STRAY, TRAIT_SOURCE_BUCKLE)
 	var/mob/living/carbon/human/buckled_human = buckled_mob
 
 	var/mob/dead/observer/G = ghost_of_buckled_mob
