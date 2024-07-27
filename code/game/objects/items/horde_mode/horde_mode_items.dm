@@ -189,10 +189,10 @@
 		return
 
 	if(istype(target, /mob/living/simple_animal/hostile/alien/horde_mode/boss) && target.health > target.maxHealth * 0.5)
-		to_chat(user, SPAN_DANGER("[target] is too strong and rejects [src]! You need to wound them more."))
+		to_chat(user, SPAN_ALERTWARNING("[target] is too strong and rejects [src]! You need to wound them more."))
 		return
 
-	to_chat(user, SPAN_DANGER("You inject [target] with [src]!"))
+	to_chat(user, SPAN_ALERTWARNING("You inject [target] with [src]!"))
 	var/mob/living/simple_animal/hostile/alien/horde_mode/boss/xeno = target
 	playsound(loc, 'sound/items/air_release.ogg', 75)
 	overlays = null

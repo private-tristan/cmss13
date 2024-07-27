@@ -179,7 +179,7 @@
 // OBSTACLES //
 ///////////////
 /obj/structure/item_purchase/door
-	name = "obstacle"
+	name = "door"
 	icon = 'icons/obj/structures/doors/personaldoor.dmi'
 	icon_state = "door_closed"
 	has_hover_effect = FALSE
@@ -189,6 +189,12 @@
 	anchored = TRUE
 	opacity = TRUE
 	var/door_id = 0
+	var/width = 1
+	var/list/filler_turfs = list()
+
+/obj/structure/item_purchase/door/Initialize(mapload, ...)
+	. = ..()
+	handle_multidoor()
 
 /obj/structure/item_purchase/door/attack_hand(mob/user)
 	if(user.a_intent == INTENT_HELP)
@@ -197,6 +203,9 @@
 
 	for(var/obj/structure/item_purchase/door/doors_in_area in loc.loc)
 		if(doors_in_area.door_id == door_id)
+			var/obj/structure/prop/horde_mode/door_open/open = new(doors_in_area.loc)
+			open.icon = icon
+			open.dir = dir
 			qdel(doors_in_area)
 
 	playsound(user.loc, 'sound/effects/horde_mode/purchase_successful.ogg')
@@ -206,6 +215,57 @@
 	. += "[icon2html(src, user)] That's \a [src]."
 	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to clear the way for [primary_cost] points.")
 
+
+/// Also refreshes filler_turfs list.
+/obj/structure/item_purchase/door/proc/change_filler_opacity(new_opacity)
+	// I have no idea why do we null opacity first before... changing it
+	for(var/turf/filler_turf as anything in filler_turfs)
+		filler_turf.set_opacity(null)
+
+	filler_turfs = list()
+	for(var/turf/filler as anything in locate_filler_turfs())
+		filler.set_opacity(new_opacity)
+		filler_turfs += filler
+
+/// Updates collision box and opacity of multi_tile airlocks.
+/obj/structure/item_purchase/door/proc/handle_multidoor()
+	if(width > 1)
+		if(dir in list(EAST, WEST))
+			bound_width = width * world.icon_size
+			bound_height = world.icon_size
+		else
+			bound_width = world.icon_size
+			bound_height = width * world.icon_size
+		change_filler_opacity(opacity)
+
+/// Finds turfs which should be filler ones.
+/obj/structure/item_purchase/door/proc/locate_filler_turfs()
+	var/turf/filler_temp
+	var/list/located_turfs = list()
+
+	for(var/i in 1 to width - 1)
+		if (dir in list(EAST, WEST))
+			filler_temp = locate(x + i, y, z)
+		else
+			filler_temp = locate(x, y + i, z)
+		if (filler_temp)
+			located_turfs += filler_temp
+	return located_turfs
+
+/obj/structure/item_purchase/door/wide
+	icon = 'icons/obj/structures/doors/2x1personaldoor.dmi'
+	width = 2
+
+/obj/structure/prop/horde_mode/door_open
+	name = "door"
+	icon = 'icons/obj/structures/doors/personaldoor.dmi'
+	icon_state = "door_open"
+
+/obj/structure/horde_mode/prop/door_open/Initialize(mapload, ...)
+	. = ..()
+	playsound(loc, 'sound/machines/airlock.ogg', 25, 0)
+	animate(src, icon_state = "door_opening", time = 0.5 SECONDS)
+	animate(icon_state = "door_open", time = 0.5 SECONDS)
 
 /////////////////////
 // REFILL STATIONS //
@@ -336,6 +396,7 @@
 
 /obj/structure/item_purchase/perk_machine/Initialize(mapload, ...)
 	. = ..()
+	set_light(2, 1, soda_overlay_color)
 	hovering_effect.pixel_y = 24
 	soda_overlay = image(icon, icon_state = "+Cola_Machine_overlay")
 	soda_overlay.color = soda_overlay_color
@@ -406,7 +467,7 @@
 
 /obj/structure/item_purchase/perk_machine/revive
 	name = "Revive Souto machine"
-	desc = "This drink is infused with specialized myoblasts, which heighten the framework of connective tissue found around the muscles of the body. This leads to a strengthened muscle tissue, especially against shockwaves and blasts."
+	desc = "This drink contains cardiostabilizing lymphatic cells that immediately kickstart the user's heart again if it ceases function. It's raspberry flavour, too!"
 	primary_cost = 2000
 	primary_purchase = /obj/item/perk_bottle/revive
 	soda_overlay_color = "#7da8fd"
@@ -418,6 +479,19 @@
 	icon_state = "souto_blueraspberry"
 	perk_trait = TRAIT_PERK_REVIVE
 
+/obj/structure/item_purchase/perk_machine/gunnut
+	name = "Gun Nut Souto machine"
+	desc = "A collaborative effort between ARMAT and the Souto company, this drink promises to increase your effectiveness with firearms by twofold. Or even more! How does it work? You have no idea, and neither do they... Supposedly tastes like root beer."
+	primary_cost = 2000
+	primary_purchase = /obj/item/perk_bottle/gunnut
+	soda_overlay_color = "#E97256"
+
+/obj/item/perk_bottle/gunnut
+	name = "\improper Gun Nut Souto"
+	desc = "When you need some help, reach for the root beer shelf..."
+	icon = 'icons/obj/items/drinkcans.dmi'
+	icon_state = "souto_diet_peach"
+	perk_trait = TRAIT_PERK_GUNNUT
 
 /////////////////
 // MYSTERY BOX //
@@ -720,6 +794,13 @@
 			if(item_to_upgrade.in_chamber)
 				item_to_upgrade.ready_in_chamber()
 
+		if(/obj/item/weapon/gun/pistol/m4a3)
+			item_to_upgrade.name = "\proper FUBAR"
+			item_to_upgrade.desc = SPAN_DANGER("You wanna explain the math of this to me?")
+			item_to_upgrade.ammo_override = /datum/ammo/grenade_container/rifle
+			if(item_to_upgrade.in_chamber)
+				item_to_upgrade.ready_in_chamber()
+
 		if(/obj/item/weapon/gun/smg/m39)
 			item_to_upgrade.name = "\proper Big Trouble"
 			item_to_upgrade.desc = SPAN_DANGER("God, aren't you even gonna kiss her goodbye?")
@@ -744,7 +825,7 @@
 	icon = 'icons/obj/items/weapons/guns/guns_by_faction/uscm.dmi'
 	icon_state = "m41a"
 	pixel_y = 14
-	layer = BELOW_MOB_LAYER
+	layer = ABOVE_XENO_LAYER
 
 /obj/effect/item_purchase/Initialize(mapload, ...)
 	. = ..()

@@ -243,6 +243,7 @@
 #define TRAIT_PERK_SPEED "t_p_speed"
 #define TRAIT_PERK_EXPLOSIVE_RESISTANCE "t_p_explosive_resistance"
 #define TRAIT_PERK_REVIVE "t_p_revive"
+#define TRAIT_PERK_GUNNUT "t_p_gunnut"
 
 // -- ability traits --
 /// Xenos with this trait cannot have plasma transfered to them

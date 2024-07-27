@@ -89,10 +89,17 @@
 	face_atom(target_mob)
 	if(isliving(target_mob))
 		var/mob/living/L = target_mob
+		animation_attack_on(L)
+		if(ishuman(L))
+			var/mob/living/carbon/human/human_target = target_mob
+			if(human_target.check_shields(0, name))
+				animation_attack_on(L)
+				playsound(human_target.loc, "bonk", 25, FALSE)
+				return
+
 		L.attack_animal(src)
-		src.animation_attack_on(L)
-		src.flick_attack_overlay(L, "slash")
-		playsound(src.loc, "alien_claw_flesh", 25, 1)
+		flick_attack_overlay(L, "slash")
+		playsound(loc, "alien_claw_flesh", 25, 1)
 		return L
 	if(istype(target_mob,/obj/structure/machinery/bot))
 		var/obj/structure/machinery/bot/B = target_mob

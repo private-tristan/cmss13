@@ -163,6 +163,7 @@
 	name = "acidic neurotoxin spit"
 	icon_state = "neurotoxin"
 	ping = "ping_x"
+	damage = 10
 
 /datum/ammo/xeno/acid/neuro/on_hit_mob(mob/hit_mob, obj/projectile/P)
 	if(ishuman(hit_mob))

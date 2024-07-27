@@ -204,6 +204,19 @@
 	basestate = "col_rwindow"
 	reinforced = TRUE
 
+/obj/structure/window_frame/colony/reinforced/horde_mode
+	density = FALSE
+
+/obj/structure/window_frame/colony/reinforced/horde_mode/attackby(obj/item/W, mob/living/user)
+	return
+
+/obj/structure/window_frame/colony/reinforced/horde_mode/ex_act(power)
+	return
+
+/obj/structure/window_frame/colony/reinforced/horde_mode/bullet_act(obj/projectile/P)
+	bullet_ping(P)
+	return
+
 /obj/structure/window_frame/chigusa
 	icon_state = "chig_window0_frame"
 	basestate = "chig_window"

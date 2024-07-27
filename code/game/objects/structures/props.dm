@@ -445,6 +445,7 @@
 	density = TRUE
 	health = 150
 	light_range = 6
+	light_color = LIGHT_COLOR_FIRE
 	light_on = TRUE
 	/// What obj this becomes when it gets to its next stage of construction / ignition
 	var/frame_type
@@ -636,6 +637,13 @@
 /obj/structure/prop/brazier/campfire/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	return ..()
+
+/obj/structure/prop/brazier/campfire/unextinguishable
+	extinguishable = FALSE
+	fuel_stage_time = INFINITY
+
+/obj/structure/prop/brazier/campfire/unextinguishable/fuel_drain(looping)
+	return
 
 #undef STATE_COMPLETE
 #undef STATE_FUEL
@@ -1180,3 +1188,79 @@
 	if(initial(emote.sound))
 		playsound(loc, initial(emote.sound), 50, FALSE)
 	return TRUE
+
+/// HORDE MODE PROPS
+/obj/structure/prop/horde_mode/comms_relay
+	name = "TC-3T static telecommunications tower"
+	desc = "A static heavy-duty TC-3T telecommunications tower. Used to set up subspace communications lines between planetary and extra-planetary locations. Your last hope. "
+	icon = 'icons/obj/structures/machinery/comm_tower3.dmi'
+	icon_state = "static1"
+	density = TRUE
+	layer = ABOVE_XENO_LAYER
+
+/obj/structure/prop/horde_mode/comms_relay/window_frame
+	name = "window frame"
+	icon = 'icons/turf/walls/window_frames.dmi'
+	icon_state = "col_window0_frame"
+
+/obj/structure/prop/horde_mode/light_fixture
+	icon = 'icons/obj/items/lighting.dmi'
+	icon_state = "tube1"
+	layer = ABOVE_XENO_LAYER
+	light_range = 5
+	light_power = 2
+
+/obj/structure/prop/horde_mode/light_fixture/Initialize(mapload, ...)
+	. = ..()
+	set_light(light_range, light_power, light_color)
+
+/obj/structure/prop/horde_mode/light_fixture/yellow
+	light_color = LIGHT_COLOR_ORANGE
+
+/obj/structure/prop/horde_mode/light_fixture/small
+	icon_state = "bulb1"
+	light_range = 3
+	light_power = 1
+
+/obj/structure/prop/horde_mode/light_fixture/small/blue
+	icon_state = "bbulb1"
+	light_color = LIGHT_COLOR_BLUE
+
+/obj/structure/prop/horde_mode/light_fixture/small/yellow
+	light_color = LIGHT_COLOR_ORANGE
+
+/obj/structure/prop/horde_mode/chair
+	name = "chair"
+	icon = 'icons/obj/objects.dmi'
+	icon_state = "chair"
+
+/obj/structure/prop/horde_mode/smes
+	name = "smes"
+	icon = 'icons/obj/structures/machinery/power.dmi'
+	icon_state = "smes"
+
+/obj/structure/prop/horde_mode/reactor
+	name = "reactor"
+	icon = 'icons/obj/structures/machinery/geothermal.dmi'
+	icon_state = "on-25"
+
+/obj/structure/prop/horde_mode/reactor/Initialize(mapload, ...)
+	. = ..()
+	icon_state = pick("off", "on10", "weld", "wire", "wrench", "on-25")
+
+/obj/structure/prop/horde_mode/chair/on_ground
+	name = "chair"
+	icon = 'icons/obj/items/weapons/weapons.dmi'
+	icon_state = "folding_chair"
+
+/obj/structure/prop/horde_mode/grave
+	name = "grave"
+	icon = 'icons/obj/structures/props/crosses.dmi'
+	icon_state = "cross1"
+
+/obj/structure/prop/horde_mode/grave/Initialize(mapload, ...)
+	. = ..()
+	var/image/dogtags = image(icon, "cross_overlay")
+	var/image/helmet = image('icons/mob/humans/onmob/head_1.dmi', "helmet")
+	helmet.pixel_y = -10
+	overlays += list(dogtags, helmet)

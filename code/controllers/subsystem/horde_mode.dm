@@ -67,8 +67,8 @@ SUBSYSTEM_DEF(horde_mode)
 		bosses_to_spawn--
 
 	for(spawn_wave, spawn_wave > 0, spawn_wave--)
-		if(length(current_xenos) < spawn_max && amount_to_spawn != 0)
-			if(specialists_to_spawn != 0 && prob(33))
+		if(length(current_xenos) < spawn_max && amount_to_spawn > 0)
+			if(specialists_to_spawn > 0 && prob(33))
 				spawn_xeno(spawnable_specialists)
 				specialists_to_spawn--
 			else
@@ -92,16 +92,20 @@ SUBSYSTEM_DEF(horde_mode)
 		xeno_damage_mod += 0.025
 		amount_to_spawn = 3*round+2
 		specialists_to_spawn = max_specialists
-		if(spawn_max < initial(spawn_max) + 3 + length(current_players))
+		if(spawn_max <= 5)
 			spawn_max++
 		round_ended = FALSE
 
 /datum/controller/subsystem/horde_mode/proc/handle_new_xenos()
 	if(round == 2)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode)
+	if(round == 3)
+		send_player_message(Gibberish("Alpha Squad, this is Lieutenant Miller from the USS Thunderhawk. Do you read me? Over.", 40), TRUE)
 	if(round == 4)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/runner)
 		send_player_message(SPAN_XENOHIGHDANGER("You catch a glimpse of something red in the distance... it's moving so fast!"))
+	if(round == 5)
+		send_player_message(Gibberish("We are detecting multiple marine life signatures. Come in, Alpha Squad. Over.", 30), TRUE)
 	if(round == 6)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/lurker)
 		spawnable_xenos.Remove(/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone)
@@ -113,6 +117,7 @@ SUBSYSTEM_DEF(horde_mode)
 	if(round == 8)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/defender)
 		send_player_message(SPAN_XENOHIGHDANGER("You start hearing loud thumps in the distance..."))
+		send_player_message(Gibberish("PRIORITY; to any marines still alive, hang on tight. The USS Thunderhawk is coming in to assist. I say again, the...", 20), TRUE)
 	if(round == 10)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/ranged/spitter)
 		max_specialists = 4
@@ -125,17 +130,27 @@ SUBSYSTEM_DEF(horde_mode)
 		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
 		bosses_to_spawn++
 		send_player_message(SPAN_XENOHIGHDANGER("You hear menacing stomps in the distance..."))
+	if(round == 16)
+		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
+		bosses_to_spawn++
+		send_player_message(SPAN_XENOHIGHDANGER("IMMEDIATE; the USS Thunderhawk is in orbit. We are sending in gunships to recon the area. Hang tight, it's almost over."), TRUE)
+	if(round == 17)
+		send_player_message(SPAN_XENOHIGHDANGER("Signal flares will be dropped at center point in T-10 seconds. Utilize them for CAS until our transport ship can get closer."), TRUE)
 
 /datum/controller/subsystem/horde_mode/proc/update_points(mob/living/player_mob, point_amount)
 	for(var/list/player as anything in current_players)
 		if(player["mob"] == player_mob)
 			player["points"] += point_amount
 
-/datum/controller/subsystem/horde_mode/proc/send_player_message(message)
+/datum/controller/subsystem/horde_mode/proc/send_player_message(message, radio_message = FALSE)
 	for(var/list/player_in_list as anything in current_players)
-		var/player_mob = player_in_list["mob"]
-		to_chat(player_mob, message)
+		var/mob/player_mob = player_in_list["mob"]
+		if(radio_message)
+			playsound_client(player_mob.client, 'sound/effects/radiostatic.ogg', player_mob.loc, 50, FALSE)
+			player_mob.play_screen_text("<span class='langchat' style=font-size:16pt;text-align:center valign='top'><u>Incoming Transmission:</u></span><br>" + "[message]", /atom/movable/screen/text/screen_text/command_order, LIGHT_COLOR_BLUE)
+			return
 
+		to_chat(player_mob, message)
 
 /datum/controller/subsystem/horde_mode/proc/return_random_player()
 	var/list/all_players

@@ -7,13 +7,13 @@ SUBSYSTEM_DEF(horde_mode_mobs)
 	var/list/currentrun = list()
 
 /datum/controller/subsystem/horde_mode_mobs/stat_entry(msg)
-	msg = "P:[length(SShorde_mode.current_xenos)]"
+	msg = "P:[length(SShorde_mode.current_xenos) + length(SShorde_mode.corrupted_xenos)]"
 	return ..()
 
 
 /datum/controller/subsystem/horde_mode_mobs/fire(resumed = FALSE)
 	if (!resumed)
-		currentrun = SShorde_mode.current_xenos.Copy()
+		currentrun = SShorde_mode.current_xenos.Copy() + SShorde_mode.corrupted_xenos.Copy()
 
 	while (length(currentrun))
 		var/mob/living/M = currentrun[length(currentrun)]

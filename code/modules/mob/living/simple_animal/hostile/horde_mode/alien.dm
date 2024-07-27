@@ -2,14 +2,23 @@
 #define FIRE_LAYER 1
 #define ishordemodemob(A) (istype(A, /mob/living/simple_animal/hostile/alien/horde_mode))
 
+#define HM_XENO_SPEED_VERY_SLOW 5
+#define HM_XENO_SPEED_SLOW 4.5
+#define HM_XENO_SPEED_AVERAGE 4
+#define HM_XENO_SPEED_FAST 3.75
+#define HM_XENO_SPEED_VERY_FAST 3.5
+#define HM_XENO_SPEED_RUNNER 2.5
+
 /mob/living/simple_animal/hostile/alien/horde_mode
 	health = XENO_HEALTH_TIER_3
 	melee_damage_lower = XENO_DAMAGE_TIER_2
 	melee_damage_upper = XENO_DAMAGE_TIER_3
 	melee_damage_taken_multiplier = 3
-	move_to_delay = 4
+	move_to_delay = HM_XENO_SPEED_AVERAGE
 	icon_size = 48
+	///How much damage the mob takes from explosives.
 	var/explosive_damage_multiplier = 1.5
+	///How much damage the mob takes from fire.
 	var/fire_damage_multiplier = 1
 	///Used for tracking which mob hit this xeno last, so we can reward them points accordingly.
 	var/mob/living/last_hit_by
@@ -20,37 +29,47 @@
 
 /mob/living/simple_animal/hostile/alien/horde_mode/Initialize()
 	. = ..()
+	//HORDE MODE MOBS ARE ADDED TO A DIFFERENT SUBSYSTEM IN horde_mode_mobs.dm, THEY DO NOT USE THE MISC MOBS SUBSYSTEM!!
 	SShorde_mode.current_xenos += src
 	//Boss enemies will always be a set strength.
 	if(!istype(src, /mob/living/simple_animal/hostile/alien/horde_mode/boss))
 		maxHealth *= SShorde_mode.xeno_health_mod
 		melee_damage_upper *= SShorde_mode.xeno_damage_mod
 		melee_damage_lower *= SShorde_mode.xeno_damage_mod
-	if(length(SShorde_mode.corrupted_xenos))
-		if(prob(80))
-			target_mob = pick(SShorde_mode.corrupted_xenos)
-		else
-			target_mob = SShorde_mode.return_random_player()
-	else
-		target_mob = SShorde_mode.return_random_player()
-	MoveToTarget()
+	find_random_target()
+	ForceMoveToTarget()
 
-/mob/living/simple_animal/hostile/alien/horde_mode/Collide(atom/movable/AM)
-	if(..())
-		return
-	if(mob_size > MOB_SIZE_XENO_VERY_SMALL)
-		now_pushing = FALSE
-	return
+///Gives us a random target to hunt down.
+/mob/living/simple_animal/hostile/alien/horde_mode/proc/find_random_target()
+	if(length(SShorde_mode.corrupted_xenos))
+		if(prob(66))
+			target_mob = pick(SShorde_mode.corrupted_xenos)
+			return
+
+	target_mob = SShorde_mode.return_random_player()
 
 /mob/living/simple_animal/hostile/alien/horde_mode/Life(delta_time)
 	handle_fire()
 	. = ..()
+	//FindTarget() would be expensive for the distances xenos need to cover from their spawn.
+	//Corrupted xenos are supposed to idle if there's nothing in their vision. Regular xenos should NEVER be idle.
+	if(!target_mob && hivenumber != XENO_HIVE_CORRUPTED)
+		find_random_target()
+		ForceMoveToTarget()
 
 /mob/living/simple_animal/hostile/alien/horde_mode/MoveToTarget()
+	//It's possible for a MoveToTarget() to be ordered while the mob is stunned. This will cause it to move while it's stunned. That's bad.
 	if(body_position == LYING_DOWN)
 		return
 	. = ..()
 
+//MoveToTarget() checks for targets within view. If there is nothing in view they'll revert to being idle.area
+//This is not ideal for enemies that just spawn. We need to force them to move regardless of vision.
+/mob/living/simple_animal/hostile/alien/horde_mode/proc/ForceMoveToTarget()
+	if(target_mob && body_position != LYING_DOWN)
+		walk_to(src, target_mob, 1, move_to_delay)
+
+///PROCS FOR HANDLING FIRE.
 /mob/living/simple_animal/hostile/alien/horde_mode/IgniteMob()
 	. = ..()
 	if (. & IGNITE_IGNITED)
@@ -71,7 +90,7 @@
 	if(on_fire && fire_reagent)
 		var/image/I
 		if(mob_size >= MOB_SIZE_BIG)
-			if((!initial(pixel_y) || body_position != LYING_DOWN)) // what's that pixel_y doing here???
+			if((!initial(pixel_y) || body_position != LYING_DOWN)) // what's that pixel_y doing here??? (i don't know)
 				I = image("icon"='icons/mob/xenos/overlay_effects64x64.dmi', "icon_state"="alien_fire", "layer"=-FIRE_LAYER)
 			else
 				I = image("icon"='icons/mob/xenos/overlay_effects64x64.dmi', "icon_state"="alien_fire_lying", "layer"=-FIRE_LAYER)
@@ -86,14 +105,9 @@
 			if(fire_overlay.icon_state == "alien_fire" || fire_overlay.icon_state == "alien_fire_lying")
 				overlays -= fire_overlay
 
-
 /mob/living/simple_animal/hostile/alien/horde_mode/Destroy()
 	. = ..()
 	SShorde_mode.current_xenos -= src
-
-/mob/living/simple_animal/hostile/alien/horde_mode/ListTargets(dist = 128)
-	var/list/L = orange(src, 128)
-	return L
 
 /mob/living/simple_animal/hostile/alien/horde_mode/death(cause, gibbed, deathmessage)
 	. = ..()
@@ -108,7 +122,7 @@
 	. = ..()
 	var/mob/living/bullet_owner = bullet.firer
 
-	if(istype(bullet_owner, /mob/living/carbon/human))
+	if(ishuman(bullet_owner))
 		death_bonus = 0
 		last_hit_by = bullet_owner
 		if(stat != DEAD)
@@ -117,9 +131,11 @@
 
 /mob/living/simple_animal/hostile/alien/horde_mode/attackby(obj/item/weapon, mob/user)
 	. = ..()
+	//We need to check for the weapon's force so players don't get rewarded with extra points for just hitting them with a pencil.
 	if(stat != DEAD && weapon.force >= MELEE_FORCE_NORMAL)
-		if(istype(weapon, /obj/item/weapon/gun))
+		if(isgun(weapon))
 			var/obj/item/weapon/gun/weapon_gun = weapon
+			//Without this check, every PB would count as a melee hit.
 			if(weapon_gun.PB_fired)
 				return
 		last_hit_by = user
@@ -153,55 +169,10 @@
 			explosion_throw(severity, direction)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/make_jittery(amount)
-	if(stat == DEAD) return //dead humans can't jitter
-	jitteriness = min(1000, jitteriness + amount) // store what will be new value
-													// clamped to max 1000
+	if(stat == DEAD) return
+	jitteriness = min(1000, jitteriness + amount)
 	if(jitteriness > 100 && !is_jittery)
 		INVOKE_ASYNC(src, PROC_REF(jittery_process))
-
-
-//FLINGING PROCS
-////////////////
-/mob/living/simple_animal/hostile/alien/horde_mode/proc/fling(mob/living/target, fling_distance = 5, ravaging_attack = FALSE)
-	if(body_position == LYING_DOWN || !Adjacent(target) || target.mob_size >= MOB_SIZE_BIG)
-		return
-
-	if(!ravaging_attack)
-		visible_message(SPAN_XENOWARNING("[src] effortlessly flings [target] to the side!"))
-	else
-		visible_message(SPAN_XENOWARNING("The force of [src]'s blow effortlessly throws [target] away!"))
-		if(isanimal(target))
-			target.apply_effect(1, WEAKEN)
-			target.apply_effect(1, PARALYZE)
-		if(prob(50))
-			roar_emote()
-
-	playsound(target,'sound/weapons/alien_claw_block.ogg', 75, 1)
-	target.last_damage_data = create_cause_data(src)
-
-	var/facing = get_dir(src, target)
-	var/damage = rand(melee_damage_lower, melee_damage_upper)
-	if(!ravaging_attack)
-		target.apply_damage(damage * 0.5, BRUTE)
-	else
-		target.apply_damage(damage, BRUTE)
-
-	face_atom(target)
-	animation_attack_on(target)
-	flick_attack_overlay(target, "disarm")
-	throw_mob(target, facing, fling_distance, SPEED_VERY_FAST, shake_camera = TRUE)
-
-/mob/living/simple_animal/hostile/alien/horde_mode/proc/throw_mob(mob/living/target, direction, distance, speed = SPEED_VERY_FAST, shake_camera = TRUE)
-	if(!direction)
-		direction = get_dir(src, target)
-	var/turf/target_destination = get_ranged_target_turf(target, direction, distance)
-
-	var/list/end_throw_callbacks
-
-	target.throw_atom(target_destination, distance, speed, src, spin = TRUE, end_throw_callbacks = end_throw_callbacks)
-	if(shake_camera)
-		shake_camera(target, 10, 1)
-
 
 //TURN INTO CORRUPTED
 /////////////////////
@@ -226,6 +197,7 @@
 	melee_damage_upper *= 2
 	melee_damage_lower *= 2
 	move_to_delay *= 0.8
+	maxHealth *= 1.5
 	SShorde_mode.corrupted_xenos += src
 	SShorde_mode.current_xenos -= src
 
@@ -251,14 +223,14 @@
 	health = XENO_HEALTH_LESSER_DRONE
 	melee_damage_lower = XENO_DAMAGE_TIER_1
 	melee_damage_upper = XENO_DAMAGE_TIER_2
-	move_to_delay = 3.5
+	move_to_delay = HM_XENO_SPEED_VERY_FAST
 	pixel_x = 0
 	icon_size = 32
 	kill_reward = 100
 
+//Lesser drones don't have wound states.
 /mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone/update_wounds()
 	return
-
 
 //RUNNER
 ////////
@@ -271,7 +243,7 @@
 	old_x = -16
 	base_pixel_x = 0
 	base_pixel_y = -20
-	move_to_delay = 2.5
+	move_to_delay = HM_XENO_SPEED_RUNNER
 	health = XENO_HEALTH_RUNNER
 	kill_reward = 175
 
@@ -285,7 +257,7 @@
 	melee_damage_lower = XENO_DAMAGE_TIER_3
 	melee_damage_upper = XENO_DAMAGE_TIER_4
 	health = XENO_HEALTH_TIER_5
-	move_to_delay = 3.8
+	move_to_delay = HM_XENO_SPEED_FAST
 	kill_reward = 200
 
 //DEFENDER
@@ -298,9 +270,8 @@
 	melee_damage_lower = XENO_DAMAGE_TIER_2
 	melee_damage_upper = XENO_DAMAGE_TIER_3
 	health = XENO_HEALTH_TIER_13
-	move_to_delay = 4.25
+	move_to_delay = HM_XENO_SPEED_SLOW
 	kill_reward = 225
-	mob_size = MOB_SIZE_BIG
 	var/crest_lowered = FALSE
 	explosive_damage_multiplier = 0.25
 	COOLDOWN_DECLARE(tail_swipe)
@@ -313,12 +284,10 @@
 /mob/living/simple_animal/hostile/alien/horde_mode/defender/Life(delta_time)
 	. = ..()
 	if(crest_lowered && COOLDOWN_FINISHED(src, crest_raise))
-		crest_lowered = FALSE
-		icon_state = "Normal Defender Walking"
-		move_to_delay -= 1
+		raise_crest()
 
 /mob/living/simple_animal/hostile/alien/horde_mode/defender/AttackingTarget()
-	if(Adjacent(target_mob) && prob(75) && COOLDOWN_FINISHED(src, tail_swipe) && target_mob.mob_size < MOB_SIZE_BIG)
+	if(Adjacent(target_mob) && prob(75) && COOLDOWN_FINISHED(src, tail_swipe) && target_mob.mob_size < MOB_SIZE_BIG && stat != DEAD)
 		COOLDOWN_START(src, tail_swipe, 16 SECONDS)
 		tail_swipe(target_mob, 4, FALSE)
 		return
@@ -327,19 +296,28 @@
 
 /mob/living/simple_animal/hostile/alien/horde_mode/defender/ex_act(severity, direction, datum/cause_data/explosion_cause_data)
 	. = ..()
-	raise_crest()
+	lower_crest()
 
 /mob/living/simple_animal/hostile/alien/horde_mode/defender/bullet_act(obj/projectile/bullet)
 	. = ..()
 	if(bullet.ammo == GLOB.ammo_list[/datum/ammo/bullet/shotgun/buckshot]) //considering players only have access to buckshot there's no reason to check for other stun ammo
-		INVOKE_ASYNC(src, PROC_REF(raise_crest))
+		INVOKE_ASYNC(src, PROC_REF(lower_crest))
 
-/mob/living/simple_animal/hostile/alien/horde_mode/defender/proc/raise_crest()
+/mob/living/simple_animal/hostile/alien/horde_mode/defender/proc/lower_crest()
 	COOLDOWN_START(src, crest_raise, COOLDOWN_TIMELEFT(src, crest_lowered) + 4 SECONDS)
 	if(!crest_lowered)
 		crest_lowered = TRUE
 		icon_state = "Normal Defender Crest"
 		move_to_delay += 1
+
+/mob/living/simple_animal/hostile/alien/horde_mode/defender/proc/raise_crest()
+	crest_lowered = FALSE
+	if(stat == DEAD)
+		icon_state = "Normal Defender Dead"
+		return
+
+	icon_state = "Normal Defender Walking"
+	move_to_delay -= 1
 
 //RANGED BASE
 /////////////
@@ -395,10 +373,14 @@
 /mob/living/simple_animal/hostile/alien/horde_mode/ranged/spitter
 	name = "Spitter"
 	health = XENO_HEALTH_TIER_6
+	icon_size = 64
+	icon = 'icons/mob/xenos/spitter.dmi'
+	projectile_to_fire = /datum/ammo/xeno/acid
 	melee_damage_lower = XENO_DAMAGE_TIER_2
 	melee_damage_upper = XENO_DAMAGE_TIER_3
 	kill_reward = 400
-	cooldown_duration = 5 SECONDS
+	move_to_delay = HM_XENO_SPEED_SLOW
+	cooldown_duration = 6 SECONDS
 	COOLDOWN_DECLARE(acid_line_cooldown)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/ranged/spitter/ranged_attack_checks(mob/living/target)
@@ -411,7 +393,7 @@
 
 
 //WARRIOR
-////////
+/////////
 /mob/living/simple_animal/hostile/alien/horde_mode/warrior
 	name = "Warrior"
 	desc = "A beefy alien with an armored carapace."
@@ -419,6 +401,7 @@
 	melee_damage_lower = XENO_DAMAGE_TIER_4
 	melee_damage_upper = XENO_DAMAGE_TIER_4
 	health = XENO_HEALTH_TIER_6
+	move_to_delay = HM_XENO_SPEED_SLOW
 	kill_reward = 250
 	COOLDOWN_DECLARE(fling_cooldown)
 	COOLDOWN_DECLARE(lunge_cooldown)
@@ -426,7 +409,7 @@
 /mob/living/simple_animal/hostile/alien/horde_mode/warrior/AttackingTarget()
 	if(Adjacent(target_mob) && prob(75) && COOLDOWN_FINISHED(src, fling_cooldown) && target_mob.mob_size < MOB_SIZE_BIG)
 		COOLDOWN_START(src, fling_cooldown, 14 SECONDS)
-		fling(target_mob)
+		fling(target_mob, stun = TRUE)
 		return
 	. = ..()
 
@@ -436,6 +419,10 @@
 		INVOKE_ASYNC(src, PROC_REF(lunge), target_mob, 5)
 		return
 	. = ..()
+
+/mob/living/simple_animal/hostile/alien/horde_mode/warrior/Initialize()
+	. = ..()
+	status_flags &= ~CANPUSH
 
 //BOSS ENEMIES
 //////////////
@@ -453,36 +440,39 @@
 	kill_reward = 3000
 	mob_size = MOB_SIZE_BIG
 	explosive_damage_multiplier = 0.25
+	var/following_mob
 	COOLDOWN_DECLARE(first_ability)
 	COOLDOWN_DECLARE(second_ability)
 	COOLDOWN_DECLARE(third_ability)
 	COOLDOWN_DECLARE(fourth_ability)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/Life(delta_time)
-	if(!target_mob && hivenumber == XENO_HIVE_CORRUPTED)
-		FindTarget(10)
-		MoveToTarget()
-		//todo: make this not so intensive like jesus christ
-		if(!target_mob && body_position != LYING_DOWN)
-			for(var/mob/living/carbon/human/humans in orange(7, src))
-				stop_automated_movement = 1
-				walk_to(src, humans, 4, move_to_delay)
-				break
 	if(target_mob && (target_mob in ListTargets(10)))
-		if(COOLDOWN_FINISHED(src, first_ability) && prob(75))
+		if(following_mob)
+			following_mob = null
+			walk_to(src, 0) //stop moving
+		if(COOLDOWN_FINISHED(src, first_ability) && prob(75)) //DASH
 			INVOKE_ASYNC(src, PROC_REF(first_ability))
-		else if(COOLDOWN_FINISHED(src, second_ability) && prob(50))
+		else if(COOLDOWN_FINISHED(src, second_ability) && prob(50)) //ACID LINE
 			INVOKE_ASYNC(src, PROC_REF(second_ability))
-		if(COOLDOWN_FINISHED(src, third_ability))
+		if(COOLDOWN_FINISHED(src, third_ability)) //SHRIEK
 			INVOKE_ASYNC(src, PROC_REF(third_ability))
-		if(COOLDOWN_FINISHED(src, fourth_ability) && Adjacent(target_mob))
+		if(COOLDOWN_FINISHED(src, fourth_ability) && Adjacent(target_mob)) //TAIL SWIPE
 			INVOKE_ASYNC(src, PROC_REF(fourth_ability))
 
 	. = ..()
 
+	//Start following a random human player if there are no enemies to fight.
+	//We are picking a random player because checking for the closest mob via a for() loop is pretty resource intensive.
+	if(!target_mob && hivenumber == XENO_HIVE_CORRUPTED && body_position != LYING_DOWN && !following_mob)
+		stop_automated_movement = 1
+		following_mob = SShorde_mode.return_random_player()
+		walk_to(src, following_mob, 4, move_to_delay)
+
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/Initialize()
 	. = ..()
 	RegisterSignal(src, COMSIG_MOVABLE_PRE_MOVE, PROC_REF(check_block))
+	status_flags &= ~(CANKNOCKDOWN|CANSTUN|CANPUSH)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/proc/check_block(mob/queen, turf/new_loc)
 	SIGNAL_HANDLER
@@ -496,7 +486,7 @@
 		return
 
 	if(prob(65))
-		fling(target_mob, 2, TRUE)
+		fling(target_mob, 2, STUN = FALSE)
 		return
 
 	if(isliving(target_mob))
@@ -551,7 +541,7 @@
 	visible_message(SPAN_XENOHIGHDANGER("[src] emits a guttural roar! A strange healing mist starts surrounding them..."))
 	for(var/mob/living/surrounding_mob in view(7, src))
 		if(surrounding_mob.faction == faction)
-			if(istype(surrounding_mob, /mob/living/carbon/human))
+			if(ishuman(surrounding_mob))
 				var/mob/living/carbon/human/friendly_human = surrounding_mob
 				var/total_health = friendly_human.species.total_health
 				friendly_human.heal_overall_damage(total_health * 0.25, total_health * 0.25)
@@ -578,12 +568,20 @@
 //RANDOM ABILTIIES
 //////////////////
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/tail_swipe(mob/living/target, distance = 3, paralyze = FALSE)
+	if(stat == DEAD)
+		return
+
 	spin_circle()
 	manual_emote("swipes its tail.")
 
 	for(target in view(1, src))
 		if(target.stat == DEAD || target.mob_size >= MOB_SIZE_BIG || target.faction == faction)
 			continue
+		if(ishuman(target))
+			var/mob/living/carbon/human/human_target = target
+			if(human_target.check_shields(0, name))
+				playsound(loc, "bonk", 75, FALSE)
+				continue
 
 		var/facing = get_dir(src, target)
 		target.apply_damage(rand(melee_damage_upper, melee_damage_lower), BRUTE)
@@ -592,8 +590,6 @@
 		if(paralyze)
 			target.apply_effect(1, PARALYZE)
 			target.apply_effect(1, WEAKEN)
-		else
-			target.apply_effect(0.25, WEAKEN)
 
 /mob/living/simple_animal/hostile/alien/horde_mode/boss/proc/ravaging_attack(mob/living/target)
 	attacktext = "tears into"
@@ -606,8 +602,10 @@
 			sleep(0.35 SECONDS)
 	attacktext = initial(attacktext)
 
+//ACID SPRAY PROCS
+//////////////////
 /mob/living/simple_animal/hostile/alien/proc/do_acid_spray_line(list/turflist, spray_path = /obj/effect/xenomorph/spray, distance_max = 5)
-	if(isnull(turflist))
+	if(isnull(turflist) || stat == DEAD)
 		return
 	var/turf/prev_turf = loc
 
@@ -628,7 +626,7 @@
 		var/atom/movable/AM = LinkBlocked(temp, prev_turf, T)
 		qdel(temp)
 		if(AM)
-			if(istype(AM, /mob/living/simple_animal/hostile/alien/horde_mode))
+			if(ishordemodemob(AM))
 				var/mob/living/simple_animal/hostile/alien/horde_mode/alien = AM
 				if(alien.faction != src.faction)
 					AM.acid_spray_act(src)
@@ -641,6 +639,8 @@
 		new spray_path(T, create_cause_data(src))
 		sleep(0.5)
 
+//SHRIEK PROC
+/////////////
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/create_shriekwave(shriekwaves_left)
 	var/offset_y = 8
 	if(mob_size == MOB_SIZE_XENO)
@@ -682,8 +682,20 @@
 		shriekwaves_left--
 		new /obj/effect/shockwave(epicenter, 10.5, 0.6, easing, offset_y)
 
+//LUNGE PROC
+////////////
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/lunge(mob/living/target, lunge_distance)
+	if(stat == DEAD)
+		return
+
 	manual_emote("lunges at [target]!")
+	animation_attack_on(target)
+	if(ishuman(target))
+		var/mob/living/carbon/human/human_target = target
+		if(human_target.check_shields(0, name))
+			playsound(loc, "bonk", 75, FALSE)
+			return
+
 	throw_atom(get_step_towards(target, src), lunge_distance, SPEED_FAST, src)
 	if(Adjacent(target))
 		target.apply_effect(0.5, ROOT)
@@ -692,4 +704,62 @@
 		if(ishuman(target))
 			INVOKE_ASYNC(target, TYPE_PROC_REF(/mob, emote), "scream")
 
+//FLINGING PROCS
+////////////////
+/mob/living/simple_animal/hostile/alien/horde_mode/proc/fling(mob/living/target, fling_distance = 5, stun = FALSE)
+	if(body_position == LYING_DOWN || !Adjacent(target) || target.mob_size >= MOB_SIZE_BIG || stat == DEAD)
+		return
+
+	animation_attack_on(target)
+	if(ishuman(target))
+		var/mob/living/carbon/human/human_target = target
+		if(human_target.check_shields(0, name))
+			playsound(loc, "bonk", 75, FALSE)
+			return
+
+	if(!stun)
+		visible_message(SPAN_XENOWARNING("[src] effortlessly flings [target] to the side!"))
+	else
+		visible_message(SPAN_XENOWARNING("The force of [src]'s blow effortlessly throws [target] away!"))
+		if(isanimal(target))
+			target.apply_effect(1, WEAKEN)
+			target.apply_effect(1, PARALYZE)
+		if(stun)
+			target.apply_effect(0.25, WEAKEN)
+		if(prob(50))
+			roar_emote()
+
+	playsound(target,'sound/weapons/alien_claw_block.ogg', 75, 1)
+	target.last_damage_data = create_cause_data(src)
+
+	var/facing = get_dir(src, target)
+	var/damage = rand(melee_damage_lower, melee_damage_upper)
+	if(!stun)
+		target.apply_damage(damage * 0.5, BRUTE)
+	else
+		target.apply_damage(damage, BRUTE)
+
+	face_atom(target)
+	animation_attack_on(target)
+	flick_attack_overlay(target, "disarm")
+	throw_mob(target, facing, fling_distance, SPEED_VERY_FAST, shake_camera = TRUE)
+
+/mob/living/simple_animal/hostile/alien/horde_mode/proc/throw_mob(mob/living/target, direction, distance, speed = SPEED_VERY_FAST, shake_camera = TRUE)
+	if(!direction)
+		direction = get_dir(src, target)
+	var/turf/target_destination = get_ranged_target_turf(target, direction, distance)
+
+	var/list/end_throw_callbacks
+
+	target.throw_atom(target_destination, distance, speed, src, spin = TRUE, end_throw_callbacks = end_throw_callbacks)
+	if(shake_camera)
+		shake_camera(target, 10, 1)
+
+
 #undef FIRE_LAYER
+#undef HM_XENO_SPEED_VERY_SLOW
+#undef HM_XENO_SPEED_SLOW
+#undef HM_XENO_SPEED_AVERAGE
+#undef HM_XENO_SPEED_FAST
+#undef HM_XENO_SPEED_VERY_FAST
+#undef HM_XENO_SPEED_RUNNER

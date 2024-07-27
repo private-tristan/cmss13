@@ -147,6 +147,8 @@
 				perk_list += "Explosive Resistance"
 			if(HAS_TRAIT(src, TRAIT_PERK_REVIVE))
 				perk_list += "Revive"
+			if(HAS_TRAIT(src, TRAIT_PERK_GUNNUT))
+				perk_list += "Gun Nut"
 			. += "Points: [player["points"]]"
 			. += "Wave: [SShorde_mode.round]"
 			if(length(perk_list))
@@ -262,18 +264,18 @@
 /mob/living/carbon/human/attack_animal(mob/living/M as mob)
 	if(M.melee_damage_upper == 0)
 		M.emote("[M.friendly] [src]")
-	else
-		if(M.attack_sound)
-			playsound(loc, M.attack_sound, 25, 1)
-		for(var/mob/O in viewers(src, null))
-			O.show_message(SPAN_DANGER("<B>[M]</B> [M.attacktext] [src]!"), SHOW_MESSAGE_VISIBLE)
-		last_damage_data = create_cause_data(initial(M.name), M)
-		M.attack_log += text("\[[time_stamp()]\] <font color='red'>attacked [key_name(src)]</font>")
-		src.attack_log += text("\[[time_stamp()]\] <font color='orange'>was attacked by [key_name(M)]</font>")
-		var/damage = rand(M.melee_damage_lower, M.melee_damage_upper)
-		var/dam_zone = pick("chest", "l_hand", "r_hand", "l_leg", "r_leg")
-		var/obj/limb/affecting = get_limb(rand_zone(dam_zone))
-		apply_damage(damage, BRUTE, affecting)
+		return
+	if(M.attack_sound)
+		playsound(loc, M.attack_sound, 25, 1)
+	for(var/mob/O in viewers(src, null))
+		O.show_message(SPAN_DANGER("<B>[M]</B> [M.attacktext] [src]!"), SHOW_MESSAGE_VISIBLE)
+	last_damage_data = create_cause_data(initial(M.name), M)
+	M.attack_log += text("\[[time_stamp()]\] <font color='red'>attacked [key_name(src)]</font>")
+	src.attack_log += text("\[[time_stamp()]\] <font color='orange'>was attacked by [key_name(M)]</font>")
+	var/damage = rand(M.melee_damage_lower, M.melee_damage_upper)
+	var/dam_zone = pick("chest", "l_hand", "r_hand", "l_leg", "r_leg")
+	var/obj/limb/affecting = get_limb(rand_zone(dam_zone))
+	apply_damage(damage, BRUTE, affecting)
 
 
 /mob/living/carbon/human/proc/implant_loyalty(mob/living/carbon/human/M, override = FALSE) // Won't override by default.

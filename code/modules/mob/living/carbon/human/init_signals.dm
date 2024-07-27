@@ -11,6 +11,9 @@
 	RegisterSignal(src, SIGNAL_ADDTRAIT(TRAIT_PERK_REVIVE), PROC_REF(on_perk_revive_gain))
 	RegisterSignal(src, SIGNAL_REMOVETRAIT(TRAIT_PERK_REVIVE), PROC_REF(on_perk_revive_loss))
 
+	RegisterSignal(src, SIGNAL_ADDTRAIT(TRAIT_PERK_GUNNUT), PROC_REF(on_perk_gunnut_gain))
+	RegisterSignal(src, SIGNAL_REMOVETRAIT(TRAIT_PERK_GUNNUT), PROC_REF(on_perk_gunnut_loss))
+
 /mob/living/carbon/human/proc/on_perk_juggernaut_gain(datum/source)
 	SIGNAL_HANDLER
 	to_chat(src, SPAN_ALERTWARNING("You heartbeat seems stronger."))
@@ -47,4 +50,14 @@
 
 /mob/living/carbon/human/proc/on_perk_revive_loss(datum/source)
 	SIGNAL_HANDLER
-	to_chat(src, SPAN_ALERTWARNING("You doubt you'll get another chance like that."))
+	to_chat(src, SPAN_ALERTWARNING("You doubt you'll get another chance like that, though."))
+
+/mob/living/carbon/human/proc/on_perk_gunnut_gain(datum/source)
+	SIGNAL_HANDLER
+	to_chat(src, SPAN_ALERTWARNING("Your eyes feel much sharper, and your hands stop shaking completely."))
+	skills.set_skill(SKILL_FIREARMS, skills.get_skill_level(SKILL_FIREARMS) + 2)
+
+/mob/living/carbon/human/proc/on_perk_gunnut_loss(datum/source)
+	SIGNAL_HANDLER
+	to_chat(src, SPAN_ALERTWARNING("Your eyesight begins to deteriorate, and your hands begin shaking again."))
+	skills.set_skill(SKILL_FIREARMS, skills.get_skill_level(SKILL_FIREARMS) - 2)
