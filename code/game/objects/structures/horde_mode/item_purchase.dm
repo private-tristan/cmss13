@@ -175,6 +175,33 @@
 	primary_purchase = /obj/item/horde_mode/stim/injector/healing
 	primary_cost = 600
 
+/obj/structure/horde_mode_dump
+	name = "trash cart"
+	desc = "It seems bottomless, really."
+	icon = 'icons/obj/structures/crates.dmi'
+	icon_state = "open_trashcart"
+	var/list/acceptable_items = list(/obj/item/weapon/gun, /obj/item/ammo_magazine)
+
+/obj/structure/horde_mode_dump/attackby(obj/item/weapon, mob/user)
+	if(user.a_intent != INTENT_HELP)
+		return
+
+	if(!istype(weapon, /obj/item/ammo_magazine/handful) || !is_type_in_list(weapon, acceptable_items))
+		to_chat(user, SPAN_WARNING("You can't dump that!"))
+		return
+
+	if(isgun(weapon))
+		SShorde_mode.handle_purchase(user, -400)
+	else
+		SShorde_mode.handle_purchase(user, -200)
+	to_chat(user, SPAN_NOTICE("You dump [weapon] into [src]."))
+	qdel(weapon)
+	playsound(user.loc, 'sound/effects/horde_mode/purchase_successful.ogg')
+
+/obj/structure/horde_mode_dump/get_examine_text(mob/user)
+	. = ..()
+	. += SPAN_NOTICE("Use <b>HELP INTENT</b> to sell unneeded weapons and magazines. Weapons are rewarded with 400 points, while magazines are rewarded with 200.")
+
 ///////////////
 // OBSTACLES //
 ///////////////
@@ -684,9 +711,9 @@
 	var/ammo_to_give = purchased_gun.current_mag.type
 	var/amount_to_give
 
-	if(purchased_gun.type in high_tier_gear)
+	if(picked_item in high_tier_gear)
 		amount_to_give = 1
-	if(purchased_gun.type in med_tier_gear)
+	if(picked_item in med_tier_gear)
 		amount_to_give = 2
 	else
 		amount_to_give = 3

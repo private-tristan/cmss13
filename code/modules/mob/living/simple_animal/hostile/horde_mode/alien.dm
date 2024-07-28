@@ -41,10 +41,9 @@
 
 ///Gives us a random target to hunt down.
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/find_random_target()
-	if(length(SShorde_mode.corrupted_xenos))
-		if(prob(66))
-			target_mob = pick(SShorde_mode.corrupted_xenos)
-			return
+	if(length(SShorde_mode.corrupted_xenos) && prob(66))
+		target_mob = pick(SShorde_mode.corrupted_xenos)
+		return
 
 	target_mob = SShorde_mode.return_random_player()
 
@@ -63,7 +62,7 @@
 		return
 	. = ..()
 
-//MoveToTarget() checks for targets within view. If there is nothing in view they'll revert to being idle.area
+//MoveToTarget() checks for targets within view. If there is nothing in view they'll revert to being idle.
 //This is not ideal for enemies that just spawn. We need to force them to move regardless of vision.
 /mob/living/simple_animal/hostile/alien/horde_mode/proc/ForceMoveToTarget()
 	if(target_mob && body_position != LYING_DOWN)

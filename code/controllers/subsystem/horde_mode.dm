@@ -93,7 +93,7 @@ SUBSYSTEM_DEF(horde_mode)
 		amount_to_spawn = 3*round+2
 		specialists_to_spawn = max_specialists
 		if(spawn_max <= 5)
-			spawn_max++
+			spawn_max = clamp(2 + floor(round / 3), 2, 5)
 		round_ended = FALSE
 
 /datum/controller/subsystem/horde_mode/proc/handle_new_xenos()

@@ -490,6 +490,11 @@
 
 	return TRUE
 
+/obj/structure/surface/table/uninteractable
+	reinforced = TRUE
+	climbable = FALSE
+	breakable = TRUE
+
 /*
  * Wooden tables
  */

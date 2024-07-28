@@ -1217,6 +1217,10 @@
 /obj/structure/prop/horde_mode/light_fixture/yellow
 	light_color = LIGHT_COLOR_ORANGE
 
+/obj/structure/prop/horde_mode/light_fixture/blue
+	icon_state = "btube1"
+	light_color = LIGHT_COLOR_BLUE
+
 /obj/structure/prop/horde_mode/light_fixture/small
 	icon_state = "bulb1"
 	light_range = 3
@@ -1228,6 +1232,17 @@
 
 /obj/structure/prop/horde_mode/light_fixture/small/yellow
 	light_color = LIGHT_COLOR_ORANGE
+
+/obj/structure/prop/horde_mode/light_fixture/small/red
+	icon_state = "firelight1"
+	light_color = COLOR_VIVID_RED
+
+/obj/structure/prop/horde_mode/light_fixture/small/purple
+	color = COLOR_PURPLE
+	light_color = LIGHT_COLOR_PURPLE
+
+/obj/structure/prop/horde_mode
+	icon = 'icons/obj/structures/props/misc.dmi'
 
 /obj/structure/prop/horde_mode/chair
 	name = "chair"
@@ -1246,7 +1261,7 @@
 
 /obj/structure/prop/horde_mode/reactor/Initialize(mapload, ...)
 	. = ..()
-	icon_state = pick("off", "on10", "weld", "wire", "wrench", "on-25")
+	icon_state = pick("off", "on-10", "weld", "wire", "wrench", "on-25")
 
 /obj/structure/prop/horde_mode/chair/on_ground
 	name = "chair"
@@ -1264,3 +1279,19 @@
 	var/image/helmet = image('icons/mob/humans/onmob/head_1.dmi', "helmet")
 	helmet.pixel_y = -10
 	overlays += list(dogtags, helmet)
+
+/obj/structure/prop/horde_mode/burying_shovel
+	name = "entrenching tool"
+	desc = "It was a perfect day to die."
+	icon_state = "entrenching_buried"
+
+/obj/structure/prop/horde_mode/dirt_mound
+	name = "dirt mound"
+	desc = "...here rests in honored glory, an American soldier..."
+	icon_state = "dirt_mound"
+
+/obj/structure/prop/horde_mode/ascend_from_darkness
+	name = "strange writing"
+	desc = "Weird. You don't remember anyone from your squad writing this... is that blood?"
+	icon = 'icons/obj/structures/props/64x64.dmi'
+	icon_state = "ascend_from_darkness"
