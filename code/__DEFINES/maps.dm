@@ -28,6 +28,7 @@ require only minor tweaks.
 #define ZTRAIT_AWAY  "Away"
 #define ZTRAIT_INTERIORS "Interiors"
 #define ZTRAIT_TECHTREE "TechTree"
+#define ZTRAIT_HORDE_MODE "Horde Mode"
 
 #define ZTRAIT_FOG "Fog"
 #define ZTRAIT_LOCKDOWN "Lockdown"

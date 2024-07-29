@@ -2,6 +2,12 @@
 	name = "\improper item purchase"
 	icon = 'icons/obj/structures/crates.dmi'
 	icon_state = "case"
+	density = TRUE
+	breakable = FALSE
+	indestructible = TRUE
+	unacidable = TRUE
+	unslashable = TRUE
+
 	var/obj/primary_purchase = /obj/item/weapon/gun/rifle/m41a
 	var/obj/secondary_purchase
 	var/obj/tertiary_purchase
@@ -39,6 +45,10 @@
 			hovering_effect.icon_state = custom_hovering_icon.icon_state
 			hovering_effect.name = custom_hovering_icon.name
 			hovering_effect.desc = custom_hovering_icon.desc
+
+/obj/structure/item_purchase/Destroy()
+	. = ..()
+	QDEL_NULL(hovering_effect)
 
 /obj/structure/item_purchase/attack_hand(mob/user)
 	var/obj/item/purchased_item
@@ -180,13 +190,17 @@
 	desc = "It seems bottomless, really."
 	icon = 'icons/obj/structures/crates.dmi'
 	icon_state = "open_trashcart"
-	var/list/acceptable_items = list(/obj/item/weapon/gun, /obj/item/ammo_magazine)
+	var/list/acceptable_items = list(/obj/item/weapon/gun, /obj/item/ammo_magazine, /obj/item/clothing/accessory/storage, /obj/item/storage/pouch/magazine, /obj/item/storage/belt/marine, /obj/item/storage/pouch/shotgun)
+
+/obj/structure/horde_mode_dump/Initialize(mapload, ...)
+	. = ..()
+	add_filter("outline", 1, outline_filter(size = 1, color = COLOR_WHITE, flags = OUTLINE_SHARP))
 
 /obj/structure/horde_mode_dump/attackby(obj/item/weapon, mob/user)
 	if(user.a_intent != INTENT_HELP)
 		return
 
-	if(!istype(weapon, /obj/item/ammo_magazine/handful) || !is_type_in_list(weapon, acceptable_items))
+	if(istype(weapon, /obj/item/ammo_magazine/handful) || !is_type_in_list(weapon, acceptable_items))
 		to_chat(user, SPAN_WARNING("You can't dump that!"))
 		return
 
@@ -218,6 +232,7 @@
 	var/door_id = 0
 	var/width = 1
 	var/list/filler_turfs = list()
+	var/unlock_area
 
 /obj/structure/item_purchase/door/Initialize(mapload, ...)
 	. = ..()
@@ -227,6 +242,13 @@
 	if(user.a_intent == INTENT_HELP)
 		if(!SShorde_mode.handle_purchase(user, primary_cost))
 			return
+
+	if(unlock_area)
+		for(var/area/horde_mode/area_to_unlock in SShorde_mode.map_areas)
+			if(!istype(area_to_unlock, unlock_area))
+				continue
+			area_to_unlock.unlocked = TRUE
+			break
 
 	for(var/obj/structure/item_purchase/door/doors_in_area in loc.loc)
 		if(doors_in_area.door_id == door_id)
@@ -305,6 +327,10 @@
 	primary_purchase = null
 	primary_cost = 300
 	has_hover_effect = FALSE
+
+/obj/structure/item_purchase/injector_refill/Initialize(mapload, ...)
+	. = ..()
+	add_filter("outline", 1, outline_filter(size = 1, color = COLOR_WHITE, flags = OUTLINE_SHARP))
 
 /obj/structure/item_purchase/injector_refill/attackby(obj/item/injector, mob/user)
 	if(!istype(injector, /obj/item/reagent_container/hypospray/autoinjector))
@@ -528,6 +554,11 @@
 	icon = 'icons/obj/structures/crates.dmi'
 	desc = "Do you feel lucky?"
 	icon_state = "closed_woodcrate"
+	density = TRUE
+	breakable = FALSE
+	indestructible = TRUE
+	unacidable = TRUE
+	unslashable = TRUE
 	var/obj/effect/hovering_effect
 	var/list/high_tier_gear = list(/obj/item/weapon/gun/flamer)
 	var/list/med_tier_gear = list(/obj/item/weapon/gun/shotgun/combat/buckshot)
@@ -745,6 +776,11 @@
 	name = "upgrade station"
 	icon = 'icons/obj/structures/crates.dmi'
 	icon_state = "case"
+	density = TRUE
+	breakable = FALSE
+	indestructible = TRUE
+	unacidable = TRUE
+	unslashable = TRUE
 
 /obj/structure/upgrade_station/attackby(obj/item/weapon/gun/item_to_upgrade, mob/user)
 	var/weapon_path = item_to_upgrade.type

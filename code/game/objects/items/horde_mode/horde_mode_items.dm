@@ -6,7 +6,8 @@
 
 /obj/item/horde_mode/Initialize(mapload, ...)
 	. = ..()
-	RegisterSignal(src, COMSIG_ITEM_DROPPED, PROC_REF(throw_away))
+	if(throw_away)
+		RegisterSignal(src, COMSIG_ITEM_DROPPED, PROC_REF(throw_away))
 
 /obj/item/horde_mode/proc/throw_away(mob/user)
 	SIGNAL_HANDLER
@@ -19,6 +20,93 @@
 	QDEL_IN(src, 3 SECONDS)
 	animate(src, 3 SECONDS, alpha = 0, easing = CUBIC_EASING)
 
+
+/obj/item/horde_mode/cas_flare
+	name = "signal flare"
+	desc = "Pull cord, throw and enjoy."
+	icon = 'icons/obj/items/lighting.dmi'
+	icon_state = "cas_flare"
+	item_state = "cas_flare"
+	light_color = "#00aa00"
+	light_range = 4
+	light_power = 2
+	var/burning = FALSE
+	COOLDOWN_DECLARE(bomb)
+	COOLDOWN_DECLARE(sound)
+
+/obj/item/horde_mode/cas_flare/update_icon()
+	overlays?.Cut()
+	. = ..()
+	if(burning)
+		set_light(light_range, light_power, light_color)
+		icon_state = "[initial(icon_state)]-on"
+		var/image/flame = image('icons/obj/items/lighting.dmi', src, "flare_flame")
+		flame.color = "#aaccaa"
+		flame.appearance_flags = KEEP_APART|RESET_COLOR|RESET_TRANSFORM
+		var/image/flame_base = image('icons/obj/items/lighting.dmi', src, "flare_flame")
+		flame_base.color = "#00aa00"
+		flame_base.appearance_flags = KEEP_APART|RESET_COLOR
+		flame_base.blend_mode = BLEND_ADD
+		flame.overlays += flame_base
+		overlays += flame
+	else
+		set_light(0)
+		icon_state = "[initial(icon_state)]"
+
+/obj/item/horde_mode/cas_flare/attack_self(mob/living/user)
+	if(burning)
+		to_chat(user, SPAN_WARNING("[src] is already burning!"))
+		return
+
+	. = ..()
+	user.visible_message(SPAN_NOTICE("[user] activates the flare."), SPAN_NOTICE("You pull the cord on the flare, activating it!"))
+	playsound(src,'sound/handling/flare_activate_2.ogg', 50, 1) //cool guy sound
+	RegisterSignal(src, COMSIG_ITEM_DROPPED, PROC_REF(air_strike))
+	burning = TRUE
+	update_icon()
+	var/mob/living/carbon/U = user
+	if(istype(U) && !U.throw_mode)
+		U.toggle_throw_mode(THROW_MODE_NORMAL)
+
+/obj/item/horde_mode/cas_flare/proc/air_strike()
+	SIGNAL_HANDLER_DOES_SLEEP
+
+	anchored = TRUE
+	playsound_z(SSmapping.levels_by_any_trait(ZTRAIT_HORDE_MODE), 'sound/weapons/dropship_sonic_boom.ogg', volume = 75)
+	sleep(1 SECONDS)
+	playsound_z(SSmapping.levels_by_any_trait(ZTRAIT_HORDE_MODE), 'sound/effects/horde_mode/airstrike.ogg', volume = 75)
+	sleep(1 SECONDS)
+	var/list/turf_list = list()
+	var/datum/cause_data/cause_data = create_cause_data("airstrike")
+	for(var/turf/turfs in range(src, 3))
+		turf_list += turfs
+
+	for(var/i = 1 to 80)
+		sleep(0.1)
+		var/turf/impact_tile = pick(turf_list)
+
+		create_shrapnel(impact_tile, 1, 0, 0, /datum/ammo/bullet/shrapnel/gau, cause_data, FALSE, 100) //simulates a bullet
+
+		for(var/atom/movable/explosion_effect in impact_tile)
+			if(isanimal(explosion_effect))
+				var/mob/living/simple_animal/target = explosion_effect
+				target.ex_act(EXPLOSION_THRESHOLD_VLOW, null, cause_data)
+				target.apply_damage(500, BRUTE)
+			else
+				explosion_effect.ex_act(EXPLOSION_THRESHOLD_VLOW)
+
+		new /obj/effect/particle_effect/expl_particles(impact_tile)
+		if(COOLDOWN_FINISHED(src, bomb))
+			new /obj/effect/particle_effect/expl_particles(impact_tile)
+			cell_explosion(impact_tile, 150, 25, EXPLOSION_FALLOFF_SHAPE_EXPONENTIAL, null, cause_data)
+			COOLDOWN_START(src, bomb, 0.5 SECONDS)
+		if(COOLDOWN_FINISHED(src, sound)) //so we don't play the same sound 20 times very fast.
+			playsound(impact_tile, 'sound/effects/gauimpact.ogg',40,1,20)
+			COOLDOWN_START(src, sound, 0.2 SECONDS)
+
+	sleep(11) //speed of sound simulation
+	playsound_z(SSmapping.levels_by_any_trait(ZTRAIT_HORDE_MODE), 'sound/effects/gau.ogg', volume = 75)
+	qdel(src)
 
 //STIM BASE
 ///////////

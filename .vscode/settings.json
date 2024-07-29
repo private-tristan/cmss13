@@ -42,5 +42,6 @@
 	},
 	"workbench.editorAssociations": {
 		"*.dmi": "dmiEditor.dmiEditor"
-	}
+	},
+	"tgstationTestExplorer.project.DMEName": "colonialmarines.dme"
 }

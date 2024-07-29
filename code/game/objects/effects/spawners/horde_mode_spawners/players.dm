@@ -9,7 +9,7 @@
 
 /obj/effect/landmark/horde_mode/xenospawn
 	name = "horde mode xeno spawner"
-	icon_state = "marine_spawn"
+	icon_state = "xeno_spawn"
 
 
 /obj/effect/landmark/horde_mode/xenospawn/Initialize(mapload, ...)

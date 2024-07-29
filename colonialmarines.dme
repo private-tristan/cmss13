@@ -1367,6 +1367,7 @@
 #include "code\game\objects\structures\crates_lockers\closets\secure\guncabinet\guncabinet.dm"
 #include "code\game\objects\structures\crates_lockers\closets\secure\guncabinet\level_blue.dm"
 #include "code\game\objects\structures\crates_lockers\closets\secure\guncabinet\level_red.dm"
+#include "code\game\objects\structures\horde_mode\horde_mode_props.dm"
 #include "code\game\objects\structures\horde_mode\item_purchase.dm"
 #include "code\game\objects\structures\pipes\binary_misc.dm"
 #include "code\game\objects\structures\pipes\pipes.dm"

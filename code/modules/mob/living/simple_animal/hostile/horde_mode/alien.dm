@@ -16,6 +16,7 @@
 	melee_damage_taken_multiplier = 3
 	move_to_delay = HM_XENO_SPEED_AVERAGE
 	icon_size = 48
+	destroy_surroundings = FALSE
 	///How much damage the mob takes from explosives.
 	var/explosive_damage_multiplier = 1.5
 	///How much damage the mob takes from fire.

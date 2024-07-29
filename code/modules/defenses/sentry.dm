@@ -477,6 +477,7 @@
 	handheld_type = /obj/item/defenses/handheld/sentry/horde_mode
 	ammo = new /obj/item/ammo_magazine/sentry/small
 	omni_directional = TRUE
+	density = FALSE
 	fire_delay = 0.35 SECONDS
 	fire_sound = "sentry_fire"
 

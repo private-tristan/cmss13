@@ -5,7 +5,7 @@
 	"survivor_types": [
         "/datum/equipment_preset/survivor/scientist/lv"
     ],
-    "traits": [{"Marine Main Ship": true}],
-    "camouflage": "classic",
+    "traits": [{"Horde Mode": true}],
+    "camouflage": "jungle",
 	"disable_ship_map": true
 }

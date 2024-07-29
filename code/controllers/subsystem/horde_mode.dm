@@ -1,12 +1,13 @@
 SUBSYSTEM_DEF(horde_mode)
 	name  = "Horde Mode"
 	wait  = 5 SECONDS
-	flags = SS_KEEP_TIMING | SS_NO_INIT
+	flags = SS_KEEP_TIMING
 	init_order = SS_INIT_HORDE_MODE
 
 	var/list/mob/living/carbon/human/current_players = list()
 	var/list/obj/effect/landmark/horde_mode/marinespawn/marine_spawns = list()
 	var/list/obj/effect/landmark/horde_mode/xenospawn/xeno_spawns = list()
+	var/list/obj/structure/prop/horde_mode/vent_spawn/vent_spawns = list()
 	var/list/mob/living/simple_animal/hostile/alien/horde_mode/current_xenos = list()
 	var/list/spawnable_xenos = list(
 		/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone
@@ -14,11 +15,21 @@ SUBSYSTEM_DEF(horde_mode)
 	var/list/spawnable_specialists = list()
 	var/list/spawnable_bosses = list()
 	var/list/corrupted_xenos = list()
+	var/list/area/horde_mode/map_areas = list()
+
+	///How many xenos can be alive before we stop spawning them.
 	var/spawn_max = 2
+	///How many xenos will we spawn in total across the entire round.
 	var/amount_to_spawn = 5
+	///How many bosses to spawn.
 	var/bosses_to_spawn = 0
+	//Specialists are a semi-rare type of xeno which have unique attributes which make them unfit to being spawn in a large amount.
+	///This var is used to SAVE the amount of specialists being spawned across multiple rounds.
 	var/max_specialists = 0
+	///How many specialits to spawn this round.
 	var/specialists_to_spawn = 0
+
+	///How many xenos to spawn per subsystem process.
 	var/spawn_wave = 2
 
 	var/round = 1
@@ -33,6 +44,17 @@ SUBSYSTEM_DEF(horde_mode)
 	var/sentries_active = 0
 	var/list/new_round_sound = list('sound/voice/alien_distantroar_3.ogg','sound/voice/xenos_roaring.ogg', 'sound/voice/4_xeno_roars.ogg')
 	COOLDOWN_DECLARE(round_cooldown)
+
+/datum/controller/subsystem/horde_mode/Initialize()
+	. = ..()
+	for(var/area/areas in GLOB.all_areas)
+		if(istype(areas, /area/horde_mode))
+			map_areas += areas
+
+	if(length(map_areas))
+		return SS_INIT_SUCCESS
+	else
+		return SS_INIT_FAILURE
 
 /datum/controller/subsystem/horde_mode/fire(resumed = FALSE)
 	if(!length(current_players) || !COOLDOWN_FINISHED(src, round_cooldown))
@@ -50,7 +72,7 @@ SUBSYSTEM_DEF(horde_mode)
 		send_player_message(SPAN_HIGHDANGER("You know nothing good can come out of this. You steel yourself for what's about to come."))
 		sleep(8 SECONDS)
 		send_player_message(SPAN_HIGHDANGER("A cacophany of horrific screeches echo in the distance. They're here!"))
-		world << sound(new_round_sound)
+		playsound_z(SSmapping.levels_by_any_trait(ZTRAIT_HORDE_MODE), new_round_sound, volume = 75)
 
 	if(!amount_to_spawn && !length(current_xenos) && !round_ended)
 		COOLDOWN_START(src, round_cooldown, (20 + round) SECONDS)
@@ -58,9 +80,9 @@ SUBSYSTEM_DEF(horde_mode)
 		send_player_message(SPAN_HIGHDANGER("Seems like the horde has died down... Take a breather and ready yourself for the next one."))
 
 	if(!amount_to_spawn && !length(current_xenos) && COOLDOWN_FINISHED(src, round_cooldown))
-		send_player_message(SPAN_HIGHDANGER("A cacophany of horrific screeches echo in the distance. They're here!"))
-		world << sound(new_round_sound)
 		increment_round()
+		send_player_message(SPAN_HIGHDANGER("A cacophany of horrific screeches echo in the distance. They're here!"))
+		playsound_z(SSmapping.levels_by_any_trait(ZTRAIT_HORDE_MODE), new_round_sound, volume = 75)
 
 	if(bosses_to_spawn > 0)
 		spawn_xeno(spawnable_bosses)
@@ -68,21 +90,41 @@ SUBSYSTEM_DEF(horde_mode)
 
 	for(spawn_wave, spawn_wave > 0, spawn_wave--)
 		if(length(current_xenos) < spawn_max && amount_to_spawn > 0)
-			if(specialists_to_spawn > 0 && prob(33))
-				spawn_xeno(spawnable_specialists)
-				specialists_to_spawn--
-			else
-				spawn_xeno(spawnable_xenos)
-				amount_to_spawn--
+			spawn_xeno(spawnable_xenos)
+			amount_to_spawn--
+		if(specialists_to_spawn > 0 && prob(33))
+			spawn_xeno(spawnable_specialists)
+			specialists_to_spawn--
 
 	spawn_wave = clamp(round, 1, 6)
 
 /datum/controller/subsystem/horde_mode/proc/spawn_xeno(xeno_type)
+	if(prob(50))
+		INVOKE_ASYNC(src, PROC_REF(spawn_in_vent), xeno_type)
+		return
+
 	var/spawn_loc = SAFEPICK(xeno_spawns)
 	var/mob_type = pick(xeno_type)
 	if(isnull(spawn_loc))
 		return
 	new mob_type(spawn_loc)
+
+/datum/controller/subsystem/horde_mode/proc/spawn_in_vent(xeno_type)
+	for(var/area/horde_mode/picked_area in map_areas)
+		if(picked_area.unlocked)
+			var/obj/structure/prop/horde_mode/vent_spawn/picked_vent = SAFEPICK(picked_area.vents_in_area)
+			if(picked_vent.is_spawning)
+				sleep(3 SECONDS)
+
+			var/spawn_loc = picked_vent.loc
+			picked_vent.animate_vent()
+			picked_vent.balloon_alert_to_viewers("something starts crawling out...")
+			picked_vent.is_spawning = TRUE
+			sleep(3 SECONDS)
+			var/mob_type = pick(xeno_type)
+			new mob_type(spawn_loc)
+			picked_vent.is_spawning = FALSE
+			return
 
 /datum/controller/subsystem/horde_mode/proc/increment_round(times = 1)
 	for(times, times > 0, times--)
@@ -95,17 +137,21 @@ SUBSYSTEM_DEF(horde_mode)
 		if(spawn_max <= 5)
 			spawn_max = clamp(2 + floor(round / 3), 2, 5)
 		round_ended = FALSE
+		for(var/area/all_areas in map_areas)
+			all_areas.base_lighting_alpha += 7
 
 /datum/controller/subsystem/horde_mode/proc/handle_new_xenos()
 	if(round == 2)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode)
 	if(round == 3)
 		send_player_message(Gibberish("Alpha Squad, this is Lieutenant Miller from the USS Thunderhawk. Do you read me? Over.", 40), TRUE)
+		sleep(5 SECONDS)
 	if(round == 4)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/runner)
 		send_player_message(SPAN_XENOHIGHDANGER("You catch a glimpse of something red in the distance... it's moving so fast!"))
 	if(round == 5)
 		send_player_message(Gibberish("We are detecting multiple marine life signatures. Come in, Alpha Squad. Over.", 30), TRUE)
+		sleep(5 SECONDS)
 	if(round == 6)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/lurker)
 		spawnable_xenos.Remove(/mob/living/simple_animal/hostile/alien/horde_mode/lesser_drone)
@@ -115,9 +161,10 @@ SUBSYSTEM_DEF(horde_mode)
 		max_specialists = 3
 		send_player_message(SPAN_XENOHIGHDANGER("A dizzying vapour overcomes you..."))
 	if(round == 8)
+		send_player_message(Gibberish("The USS Thunderhawk is coming in to assist. I say again, the...", 20), TRUE)
+		sleep(5 SECONDS)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/defender)
 		send_player_message(SPAN_XENOHIGHDANGER("You start hearing loud thumps in the distance..."))
-		send_player_message(Gibberish("PRIORITY; to any marines still alive, hang on tight. The USS Thunderhawk is coming in to assist. I say again, the...", 20), TRUE)
 	if(round == 10)
 		spawnable_xenos.Add(/mob/living/simple_animal/hostile/alien/horde_mode/ranged/spitter)
 		max_specialists = 4
@@ -130,12 +177,14 @@ SUBSYSTEM_DEF(horde_mode)
 		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
 		bosses_to_spawn++
 		send_player_message(SPAN_XENOHIGHDANGER("You hear menacing stomps in the distance..."))
-	if(round == 16)
+	if(round == 15)
 		spawnable_bosses.Add(/mob/living/simple_animal/hostile/alien/horde_mode/boss)
 		bosses_to_spawn++
-		send_player_message(SPAN_XENOHIGHDANGER("IMMEDIATE; the USS Thunderhawk is in orbit. We are sending in gunships to recon the area. Hang tight, it's almost over."), TRUE)
-	if(round == 17)
+		send_player_message(SPAN_XENOHIGHDANGER("The USS Thunderhawk is in orbit. We are sending in gunships to recon the area. Hang tight, it's almost over."), TRUE)
+		sleep(5 SECONDS)
+	if(round == 16)
 		send_player_message(SPAN_XENOHIGHDANGER("Signal flares will be dropped at center point in T-10 seconds. Utilize them for CAS until our transport ship can get closer."), TRUE)
+		sleep(5 SECONDS)
 
 /datum/controller/subsystem/horde_mode/proc/update_points(mob/living/player_mob, point_amount)
 	for(var/list/player as anything in current_players)
