@@ -142,10 +142,10 @@
 #define SUIT_SQUAD_LAYER 28
 #define GLASSES_LAYER 27
 #define BELT_LAYER 26
-#define SUIT_STORE_LAYER 25
-#define BACK_LAYER 24
-#define HAIR_LAYER 23
-#define HAIR_GRADIENT_LAYER 22
+#define BACK_LAYER 25
+#define HAIR_LAYER 24
+#define HAIR_GRADIENT_LAYER 23
+#define SUIT_STORE_LAYER 22
 #define FACIAL_LAYER 21
 #define EARS_LAYER 20
 #define FACEMASK_LAYER 19
@@ -187,6 +187,7 @@
 #define SYNTH_COMBAT "Combat Synthetic"
 #define SYNTH_INFILTRATOR "Infiltrator Synthetic"
 #define SYNTH_WORKING_JOE "Working Joe"
+#define SYNTH_HAZARD_JOE "Hazard Joe"
 #define SYNTH_GEN_ONE "First Generation Synthetic"
 #define SYNTH_GEN_TWO "Second Generation Synthetic"
 #define SYNTH_GEN_THREE "Third Generation Synthetic"

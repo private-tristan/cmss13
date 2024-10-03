@@ -65,7 +65,7 @@
 		omnisentry_price += omnisentry_price_scale
 	icon_state = "drone_fab_active"
 	busy = TRUE
-	addtimer(CALLBACK(src, PROC_REF(do_build_part), part_type), 10 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(do_build_part), part_type), 3 SECONDS)
 
 /obj/structure/machinery/part_fabricator/proc/do_build_part(part_type)
 	busy = FALSE
@@ -233,9 +233,9 @@
 		qdel(thing)
 	qdel(powerloader_clamp_used.loaded)
 	powerloader_clamp_used.loaded = null
-	to_chat(user, SPAN_NOTICE("You recycle \the [thing_to_recycle] into [src], and get back [round(recycle_points * 0.8)] points."))
-	msg_admin_niche("[key_name(user)] recycled a [thing_to_recycle] into \the [src] for [round(recycle_points * 0.8)] points.")
-	add_to_point_store(round(recycle_points * 0.8))
+	to_chat(user, SPAN_NOTICE("You recycle \the [thing_to_recycle] into [src], and get back [floor(recycle_points * 0.8)] points."))
+	msg_admin_niche("[key_name(user)] recycled a [thing_to_recycle] into \the [src] for [floor(recycle_points * 0.8)] points.")
+	add_to_point_store(floor(recycle_points * 0.8))
 	playsound(loc, 'sound/machines/fax.ogg', 40, 1)
 	powerloader_clamp_used.update_icon()
 

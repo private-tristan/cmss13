@@ -61,7 +61,6 @@ GLOBAL_VAR_INIT(players_preassigned, 0)
 											/datum/job/special/uaac,
 											/datum/job/special/uaac/tis,
 											/datum/job/special/uscm,
-											/datum/job/command/tank_crew //Rip VC
 											)
 	var/squads_all[] = typesof(/datum/squad) - /datum/squad
 	var/castes_all[] = subtypesof(/datum/caste_datum)
@@ -210,13 +209,27 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 	if(istype(CO_surv_job))
 		CO_surv_job.set_spawn_positions(GLOB.players_preassigned)
 
-	if(SSnightmare.get_scenario_value("predator_round") && !Check_WO())
+	var/chance
+	var/pred_round = FALSE
+	var/datum/view_record/predround_chance/meta = locate() in DB_VIEW(/datum/view_record/predround_chance, DB_COMP("id", DB_EQUALS, 1))
+	if(!meta)
+		var/datum/entity/predround_chance/entity = DB_ENTITY(/datum/entity/predround_chance, 1)
+		entity.chance = 0 // This is 0 instead of 20 because it is going to get increased in modify_pred_round_chance
+		chance = 20
+		entity.save()
+	else
+		chance = meta.chance
+
+	if(prob(chance) && !Check_WO())
+		pred_round = TRUE
 		SSticker.mode.flags_round_type |= MODE_PREDATOR
 		// Set predators starting amount based on marines assigned
 		var/datum/job/PJ = temp_roles_for_mode[JOB_PREDATOR]
 		if(istype(PJ))
 			PJ.set_spawn_positions(GLOB.players_preassigned)
-		REDIS_PUBLISH("byond.round", "type" = "predator-round", "map" = SSmapping.configs[GROUND_MAP].map_name)
+		REDIS_PUBLISH("byond.round", "type" = "predator-round", "map" = SSmapping.configs[GROUND_MAP].map_name)		
+
+	DB_FILTER(/datum/entity/predround_chance, DB_COMP("id", DB_EQUALS, 1), CALLBACK(src, PROC_REF(modify_pred_round_chance), pred_round))
 
 	// Assign the roles, this time for real, respecting limits we have established.
 	var/list/roles_left = assign_roles(temp_roles_for_mode, unassigned_players)
@@ -332,7 +345,7 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 		var/i = 0
 		var/j
 		while(++i < 3) //Get two passes.
-			if(!roles_to_iterate.len || prob(65)) break //Base chance to become a marine when being assigned randomly, or there are no roles available.
+			if(!length(roles_to_iterate) || prob(65)) break //Base chance to become a marine when being assigned randomly, or there are no roles available.
 			j = pick(roles_to_iterate)
 			J = roles_to_iterate[j]
 
@@ -534,7 +547,7 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 
 //Find which squad has the least population. If all 4 squads are equal it should just use a random one
 /datum/authority/branch/role/proc/get_lowest_squad(mob/living/carbon/human/H)
-	if(!squads.len) //Something went wrong, our squads aren't set up.
+	if(!length(squads)) //Something went wrong, our squads aren't set up.
 		to_world("Warning, something messed up in get_lowest_squad(). No squads set up!")
 		return null
 
@@ -543,7 +556,7 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 	var/list/squads_copy = squads.Copy()
 	var/list/mixed_squads = list()
 
-	for(var/i= 1 to squads_copy.len)
+	for(var/i= 1 to length(squads_copy))
 		var/datum/squad/S = pick_n_take(squads_copy)
 		if (S.roundstart && S.usable && S.faction == H.faction && S.name != "Root")
 			mixed_squads += S
@@ -587,7 +600,7 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 	if(!H)
 		return
 
-	if(!squads.len)
+	if(!length(squads))
 		to_chat(H, "Something went wrong with your squad randomizer! Tell a coder!")
 		return //Shit, where's our squad data
 
@@ -598,7 +611,7 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 	var/list/squads_copy = squads.Copy()
 	var/list/mixed_squads = list()
 	// The following code removes non useable squads from the lists of squads we assign marines too.
-	for(var/i= 1 to squads_copy.len)
+	for(var/i= 1 to length(squads_copy))
 		var/datum/squad/S = pick_n_take(squads_copy)
 		if (S.roundstart && S.usable && S.faction == H.faction && S.name != "Root")
 			mixed_squads += S
@@ -824,3 +837,8 @@ I hope it's easier to tell what the heck this proc is even doing, unlike previou
 			if(new_squad.num_tl >= new_squad.max_tl)
 				return TRUE
 	return FALSE
+
+/datum/authority/branch/role/proc/modify_pred_round_chance(pred_round, list/datum/entity/predround_chance/entities)
+	var/datum/entity/predround_chance/entity = locate() in entities
+	entity.chance = pred_round ? 20 : entity.chance + 20
+	entity.save()
