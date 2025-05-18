@@ -26,8 +26,8 @@
 						SPAN_NOTICE("You extinguished the fire on [src]."), null, 5)
 				return 1
 
-			// If unconscious with oxygen damage, do CPR. If dead, we do CPR
-			if(!(stat == UNCONSCIOUS && getOxyLoss() > 0) && !(stat == DEAD))
+			// If unconscious with some oxygen damage, do CPR. If dead, we do CPR
+			if(!(stat == UNCONSCIOUS && getOxyLoss() > 5) && !(stat == DEAD))
 				help_shake_act(attacking_mob)
 				return 1
 
