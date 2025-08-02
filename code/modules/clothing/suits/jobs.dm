@@ -95,7 +95,7 @@
 	item_state = "chef"
 	icon = 'icons/obj/items/clothing/suits/coats_robes.dmi'
 	gas_transfer_coefficient = 0.90
-	permeability_coefficient = 0.50
+
 	flags_armor_protection = BODY_FLAG_CHEST|BODY_FLAG_GROIN|BODY_FLAG_ARMS
 	allowed = list (
 		/obj/item/tool/kitchen/knife,
@@ -136,74 +136,46 @@
 		/obj/item/tool/pen,
 	)
 
+/obj/item/clothing/suit/chef/classic/stain
+	icon_state = "apronchef_stain"
+	item_state = "apronchef_stain"
+
 //Detective
-/obj/item/clothing/suit/storage/det_suit
-	name = "coat"
-	desc = "An 18th-century multi-purpose trenchcoat. Someone who wears this means serious business."
-	icon_state = "detective"
-	item_state = "det_suit"
+/obj/item/clothing/suit/storage/CMB/trenchcoat
+	name = "\improper tan trench-coat"
+	desc = "A worn, tan, old style trench-coat. A classic of noir style apparel."
 	icon = 'icons/obj/items/clothing/suits/coats_robes.dmi'
-	blood_overlay_type = "coat"
-	flags_armor_protection = BODY_FLAG_CHEST|BODY_FLAG_ARMS
-	allowed = list(
-		/obj/item/device/analyzer,
-		/obj/item/device/multitool,
-		/obj/item/device/pipe_painter,
-		/obj/item/device/radio,
-		/obj/item/device/t_scanner,
-		/obj/item/tool/crowbar,
-		/obj/item/tool/screwdriver,
-		/obj/item/tool/weldingtool,
-		/obj/item/tool/wirecutters,
-		/obj/item/tool/wrench,
-		/obj/item/clothing/mask/gas,
-
-		/obj/item/weapon/gun,
-		/obj/item/ammo_magazine,
-		/obj/item/ammo_casing,
-		/obj/item/weapon/baton,
-		/obj/item/restraint/handcuffs,
-		/obj/item/storage/fancy/cigarettes,
-		/obj/item/tool/lighter,
-		/obj/item/weapon/baton,
-		/obj/item/restraint/handcuffs,
-		/obj/item/device/binoculars,
-		/obj/item/attachable/bayonet,
-		/obj/item/storage/belt/gun/m4a3,
-		/obj/item/storage/belt/gun/m44,
-		/obj/item/storage/belt/gun/mateba,
-		/obj/item/storage/belt/gun/smartpistol,
-
-		/obj/item/device/flashlight,
-		/obj/item/device/healthanalyzer,
-		/obj/item/device/taperecorder,
-		/obj/item/device/radio,
-		/obj/item/tank/emergency_oxygen,
-		/obj/item/tool/crowbar,
-		/obj/item/tool/crew_monitor,
-		/obj/item/tool/pen,
-		/obj/item/storage/large_holster/machete,
-		/obj/item/storage/large_holster/katana,
-		/obj/item/device/motiondetector,
-	)
-	armor_melee = CLOTHING_ARMOR_MEDIUMLOW
-	armor_bullet = CLOTHING_ARMOR_MEDIUMLOW
-	armor_laser = CLOTHING_ARMOR_MEDIUMLOW
-	armor_energy = CLOTHING_ARMOR_MEDIUMLOW
-	armor_bomb = CLOTHING_ARMOR_NONE
-	armor_bio = CLOTHING_ARMOR_NONE
-	armor_rad = CLOTHING_ARMOR_NONE
-	armor_internaldamage = CLOTHING_ARMOR_LOW
-	valid_accessory_slots = list(ACCESSORY_SLOT_ARMBAND, ACCESSORY_SLOT_DECOR)
-	restricted_accessory_slots = list(ACCESSORY_SLOT_ARMBAND)
 	item_icons = list(
 		WEAR_JACKET = 'icons/mob/humans/onmob/clothing/suits/coats_robes.dmi',
-		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/clothing/suits_lefthand.dmi',
-		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/clothing/suits_righthand.dmi',
 	)
+	icon_state = "trench_tan"
+	item_state = "trench_tan"
+	uniform_restricted = null
 
-/obj/item/clothing/suit/storage/det_suit/black
+/obj/item/clothing/suit/storage/CMB/trenchcoat/brown
+
+	name = "\improper brown trench-coat"
+	desc = "A worn, brown, old style trench-coat. When a bum sees a dick coming, he don't stick around."
+	icon_state = "trench_brown"
+	item_state = "trench_brown"
+
+/obj/item/clothing/suit/storage/CMB/trenchcoat/grey
+	name = "\improper grey trench-coat"
+	desc = "A worn, brown, old style trench-coat. When a bum sees a dick coming, he don't stick around."
+	icon_state = "trench_grey"
+	item_state = "trench_grey"
+
+/obj/item/clothing/suit/storage/CMB/trenchcoat/police
+	name = "\improper tan police trench-coat"
+	desc = "A light tan coat with a badge. Often worn by government officiated crime scene investigators rather than private sleuths, this suit strikes authority into those who see it."
+	icon_state = "detective"
+	item_state = "detective"
+
+/obj/item/clothing/suit/storage/CMB/trenchcoat/police/black
+	name = "\improper black police trench-coat"
+	desc = "A light black coat with a badge. Often worn by government officiated crime scene investigators rather than private sleuths, this suit strikes authority into those who see it."
 	icon_state = "detective2"
+	item_state = "detective2"
 
 //Forensics
 /obj/item/clothing/suit/storage/forensics
@@ -260,8 +232,6 @@
 	armor_bio = CLOTHING_ARMOR_NONE
 	armor_rad = CLOTHING_ARMOR_NONE
 	armor_internaldamage = CLOTHING_ARMOR_LOW
-	valid_accessory_slots = list(ACCESSORY_SLOT_ARMBAND, ACCESSORY_SLOT_DECOR)
-	restricted_accessory_slots = list(ACCESSORY_SLOT_ARMBAND)
 	item_icons = list(
 		WEAR_JACKET = 'icons/mob/humans/onmob/clothing/suits/jackets.dmi',
 		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/clothing/suits_lefthand.dmi',
@@ -272,11 +242,19 @@
 	name = "red jacket"
 	desc = "A red forensics technician jacket."
 	icon_state = "forensics_red"
+	icon = 'icons/obj/items/clothing/suits/coats_robes.dmi'
+	item_icons = list(
+		WEAR_JACKET = 'icons/mob/humans/onmob/clothing/suits/coats_robes.dmi',
+	)
 
 /obj/item/clothing/suit/storage/forensics/blue
 	name = "blue jacket"
 	desc = "A blue forensics technician jacket."
 	icon_state = "forensics_blue"
+	icon = 'icons/obj/items/clothing/suits/coats_robes.dmi'
+	item_icons = list(
+		WEAR_JACKET = 'icons/mob/humans/onmob/clothing/suits/coats_robes.dmi',
+	)
 
 //Engineering
 /obj/item/clothing/suit/storage/hazardvest
@@ -323,7 +301,6 @@
 		/obj/item/device/motiondetector,
 	)
 	flags_armor_protection = BODY_FLAG_CHEST
-	valid_accessory_slots = list(ACCESSORY_SLOT_MEDAL)
 	item_icons = list(
 		WEAR_JACKET = 'icons/mob/humans/onmob/clothing/suits/vests_aprons.dmi',
 	)
@@ -347,29 +324,53 @@
 	item_state = "hazard_black"
 
 //Lawyer
-/obj/item/clothing/suit/storage/lawyer
+/obj/item/clothing/suit/storage/jacket/marine/lawyer
+	desc = "A snappy dress jacket."
 	icon = 'icons/obj/items/clothing/suits/jackets.dmi'
 	item_icons = list(
 		WEAR_JACKET = 'icons/mob/humans/onmob/clothing/suits/jackets.dmi',
 	)
-
-/obj/item/clothing/suit/storage/lawyer/bluejacket
-	name = "Blue Suit Jacket"
-	desc = "A snappy dress jacket."
-	icon_state = "suitjacket_blue_open"
-	item_state = "suitjacket_blue_open"
-	blood_overlay_type = "coat"
 	flags_armor_protection = BODY_FLAG_CHEST|BODY_FLAG_ARMS
+
+	flags_atom = NO_GAMEMODE_SKIN|NO_NAME_OVERRIDE
 	valid_accessory_slots = list(ACCESSORY_SLOT_ARMBAND, ACCESSORY_SLOT_DECOR, ACCESSORY_SLOT_MEDAL)
-	restricted_accessory_slots = list(ACCESSORY_SLOT_ARMBAND)
-
-/obj/item/clothing/suit/storage/lawyer/purpjacket
-	name = "Purple Suit Jacket"
-	desc = "A snappy dress jacket."
-	icon_state = "suitjacket_purp"
-	item_state = "suitjacket_purp"
+	has_buttons = TRUE
 	blood_overlay_type = "coat"
-	flags_armor_protection = BODY_FLAG_CHEST|BODY_FLAG_ARMS
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/bluejacket
+	name = "blue suit-jacket"
+	icon_state = "suitjacket_blue"
+	initial_icon_state = "suitjacket_blue"
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/purpjacket
+	name = "purple suit-jacket"
+	icon_state = "suitjacket_purp"
+	initial_icon_state = "suitjacket_purp"
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/redjacket
+	name = "red suit-jacket"
+	icon_state = "suitjacket_red"
+	initial_icon_state = "suitjacket_red"
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/blackjacket
+	name = "black suit-jacket"
+	icon_state = "suitjacket_black"
+	initial_icon_state = "suitjacket_black"
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/comedian
+	name = "bright red suit-jacket"
+	icon_state = "suitjacket_comedian"
+	initial_icon_state = "suitjacket_comedian"
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/brown
+	name = "brown suit-jacket"
+	icon_state = "suitjacket_brown"
+	initial_icon_state = "suitjacket_brown"
+
+/obj/item/clothing/suit/storage/jacket/marine/lawyer/light_brown
+	name = "light-brown suit-jacket"
+	icon_state = "suitjacket_lightbrown"
+	initial_icon_state = "suitjacket_lightbrown"
 
 //Windbreakers
 /obj/item/clothing/suit/storage/windbreaker
@@ -403,8 +404,6 @@
 		/obj/item/device/motiondetector,
 	)
 	flags_armor_protection = BODY_FLAG_CHEST|BODY_FLAG_ARMS
-	valid_accessory_slots = list(ACCESSORY_SLOT_ARMBAND, ACCESSORY_SLOT_DECOR, ACCESSORY_SLOT_MEDAL)
-	restricted_accessory_slots = list(ACCESSORY_SLOT_ARMBAND)
 	var/zip_unzip = FALSE
 	actions_types = list(/datum/action/item_action/toggle)
 	item_icons = list(

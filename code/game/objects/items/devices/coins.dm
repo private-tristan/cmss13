@@ -31,6 +31,10 @@
 	name = "falling falcons challenge coin"
 	desc = "A small coin, bearing the falling falcons insignia."
 
+/obj/item/coin/silver/cia
+	name = "silver coin"
+	desc = "A coin of silver. It bears an eagle on the heads side."
+
 /obj/item/coin/copper
 	name = "copper coin"
 	desc = "A familiar, but cheap form of currency."
@@ -113,7 +117,7 @@
 		comment = "tails"
 	else if(result == 2)
 		comment = "heads"
-	user.visible_message(SPAN_NOTICE("[user] has thrown \the [src]. It lands on [comment]! "), \
+	user.visible_message(SPAN_NOTICE("[user] has thrown \the [src]. It lands on [comment]! "),
 						SPAN_NOTICE("You throw \the [src]. It lands on [comment]! "))
 
 

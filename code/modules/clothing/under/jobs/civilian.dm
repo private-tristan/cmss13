@@ -105,7 +105,6 @@
 	item_icons = list(
 		WEAR_BODY = 'icons/mob/humans/onmob/clothing/uniforms/uniforms_by_department/service.dmi',
 	)
-	permeability_coefficient = 0.50
 
 /obj/item/clothing/under/rank/janitor
 	desc = "It's the official uniform of the station's janitor. It has minor protection from biohazards."
@@ -154,16 +153,16 @@
 	icon_state = "lawyer_blue"
 
 /obj/item/clothing/under/lawyer/bluesuit
-	name = "Blue Suit"
+	name = "blue suit"
 	desc = "A classy suit and tie"
 	icon_state = "bluesuit"
 
 /obj/item/clothing/under/lawyer/purpsuit
-	name = "Purple Suit"
+	name = "purple suit"
 	icon_state = "lawyer_purp"
 
 /obj/item/clothing/under/lawyer/oldman
-	name = "Old Man's Suit"
+	name = "old man's suit"
 	desc = "A classic suit for the older gentleman with built in back support."
 	icon_state = "oldman"
 
@@ -177,3 +176,7 @@
 	)
 	flags_jumpsuit = FALSE
 
+/obj/item/clothing/under/lawyer/comedian
+	name = "colorful suit"
+	desc = "A garish outfit that’s equal parts showmanship and menace. Strikingly colorful, it leaves an impression you might never forget."
+	icon_state = "comedian"

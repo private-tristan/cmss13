@@ -91,12 +91,17 @@
 	hardhat_color = "red"
 	name = "firefighter helmet"
 	gas_transfer_coefficient = 0.01
-	permeability_coefficient = 0.01
+
 	flags_inventory = NOPRESSUREDMAGE|BLOCKSHARPOBJ|COVERMOUTH|ALLOWINTERNALS|COVEREYES|BLOCKGASEFFECT|ALLOWREBREATH|ALLOWCPR
 	flags_heat_protection = BODY_FLAG_HEAD|BODY_FLAG_FACE|BODY_FLAG_EYES
 	flags_cold_protection = BODY_FLAG_HEAD|BODY_FLAG_FACE|BODY_FLAG_EYES
 	max_heat_protection_temperature = FIRE_HELMET_MAX_HEAT_PROT
 	min_cold_protection_temperature = ICE_PLANET_MIN_COLD_PROT
+
+/obj/item/clothing/head/hardhat/white/alt
+	icon_state = "hardhat0_white_alt"
+	hardhat_color = "white_alt"
+	name = "Jùtóu Combine mining helmet"
 
 /obj/item/clothing/head/hardhat/white
 	icon_state = "hardhat0_white"
@@ -109,3 +114,7 @@
 	icon_state = "hardhat0_dblue"
 	hardhat_color = "dblue"
 
+/obj/item/clothing/head/hardhat/red/kelland
+	icon_state = "hardhat0_red"
+	hardhat_color = "red"
+	name = "kelland-mining hard hat"

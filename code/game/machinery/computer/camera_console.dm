@@ -253,7 +253,7 @@
 			return TRUE
 		toggle_anchored(wrench, user)
 		return TRUE
-	..()
+	. = ..()
 
 /obj/structure/machinery/computer/cameras/wooden_tv/broadcast/toggle_anchored(obj/item/wrench, mob/user)
 	. = ..()
@@ -303,7 +303,7 @@
 	if(inoperable())
 		return
 	if(show_message_above_tv)
-		langchat_speech(emote, get_mobs_in_view(7, src), null, null, TRUE, LANGCHAT_FAST_POP, list("emote"))
+		langchat_speech(emote, get_mobs_in_view(7, src), skip_language_check = TRUE, animation_style = LANGCHAT_FAST_POP, additional_styles = list("emote"))
 	for(var/datum/weakref/user_ref in concurrent_users)
 		var/mob/user = user_ref.resolve()
 		if(user?.client?.prefs && (user.client.prefs.toggles_langchat & LANGCHAT_SEE_EMOTES) && (!audible || !user.ear_deaf))
@@ -428,5 +428,21 @@
 /obj/structure/machinery/computer/cameras/dropship/three
 	name = "\improper 'Saipan' camera controls"
 	network = list(CAMERA_NET_RESEARCH, CAMERA_NET_LASER_TARGETS)
+
+/obj/structure/machinery/computer/cameras/yautja
+	name = "Hellhound Observation Interface"
+	alpha = 0
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	density = FALSE
+	use_power = USE_POWER_NONE
+	idle_power_usage = 0
+	active_power_usage = 0
+	needs_power = FALSE
+	network = list(CAMERA_NET_YAUTJA)
+	explo_proof = TRUE
+
+/obj/structure/machinery/computer/cameras/yautja/Initialize()
+	. = ..()
+	SEND_SIGNAL(src, COMSIG_CAMERA_SET_NVG, 5, NV_COLOR_RED)
 
 #undef DEFAULT_MAP_SIZE

@@ -157,13 +157,11 @@
 	mouse_opacity = FALSE
 	can_bloody = FALSE
 	supports_surgery = FALSE
+	is_weedable = NOT_WEEDABLE
 
 /turf/open/void/vehicle
 	density = TRUE
 	opacity = TRUE
-
-/turf/open/void/is_weedable()
-	return NOT_WEEDABLE
 
 /turf/open/river
 	can_bloody = FALSE
@@ -187,6 +185,7 @@
 	icon_state = "mars_sand_1"
 	is_groundmap_turf = TRUE
 	minimap_color = MINIMAP_MARS_DIRT
+	is_weedable = SEMI_WEEDABLE
 
 
 /turf/open/mars_cave
@@ -449,6 +448,18 @@
 	baseturfs = /turf/open/gm/dirt
 	minimap_color = MINIMAP_DIRT
 
+/turf/open/gm/dirt/beach
+	icon_state = "beach"
+
+/turf/open/gm/dirt/beach/northeast
+	dir = NORTHEAST
+
+/turf/open/gm/dirt/beach/southeast
+	dir = SOUTHEAST
+
+/turf/open/gm/dirt/beach/northwest
+	dir = NORTHWEST
+
 /turf/open/gm/dirt/Initialize(mapload, ...)
 	. = ..()
 	if(rand(0,15) == 0)
@@ -474,6 +485,7 @@
 	icon_state = "grass1"
 	baseturfs = /turf/open/gm/grass
 	scorchable = "grass1"
+	is_weedable = SEMI_WEEDABLE
 
 /turf/open/gm/grass/grass1
 	icon_state = "grass1"
@@ -534,11 +546,13 @@
 	icon_state = "grassdirt_edge"
 	baseturfs = /turf/open/gm/dirtgrassborder
 	scorchable = "grass1"
+	is_weedable = SEMI_WEEDABLE
 
 /turf/open/gm/dirtgrassborder/north
+	dir = NORTH
 
 /turf/open/gm/dirtgrassborder/south
-	dir = 1
+	dir = SOUTH
 
 /turf/open/gm/dirtgrassborder/west
 	dir = 4
@@ -628,6 +642,7 @@
 	name = "river"
 	icon_state = "seashallow"
 	can_bloody = FALSE
+	fishing_allowed = TRUE
 	var/icon_overlay = "riverwater"
 	var/covered = 0
 	var/covered_name = "grate"
@@ -639,6 +654,7 @@
 	baseturfs = /turf/open/gm/river
 	supports_surgery = FALSE
 	minimap_color = MINIMAP_WATER
+	is_weedable = NOT_WEEDABLE
 
 /turf/open/gm/river/Initialize(mapload, ...)
 	. = ..()
@@ -658,21 +674,6 @@
 	else
 		name = default_name
 		overlays += image("icon"=src.icon,"icon_state"=icon_overlay,"layer"=ABOVE_MOB_LAYER,"dir" = dir)
-
-/turf/open/gm/river/ex_act(severity)
-	if(covered & severity >= EXPLOSION_THRESHOLD_LOW)
-		covered = 0
-		update_icon()
-		spawn(10)
-			for(var/atom/movable/AM in src)
-				src.Entered(AM)
-				for(var/atom/movable/AM1 in src)
-					if(AM == AM1)
-						continue
-					AM1.Crossed(AM)
-	if(!covered && supports_fishing && prob(5))
-		var/obj/item/caught_item = get_fishing_loot(src, get_area(src), 15, 35, 10, 2)
-		caught_item.sway_jitter(3, 6)
 
 /turf/open/gm/river/Entered(atom/movable/AM)
 	..()
@@ -711,7 +712,8 @@
 
 
 /turf/open/gm/river/proc/cleanup(mob/living/carbon/human/M)
-	if(!M || !istype(M)) return
+	if(!M || !istype(M))
+		return
 
 	if(M.back)
 		if(M.back.clean_blood())
@@ -741,7 +743,8 @@
 
 /turf/open/gm/river/poison/Entered(mob/living/M)
 	..()
-	if(istype(M)) M.apply_damage(55,TOX)
+	if(istype(M))
+		M.apply_damage(55,TOX)
 
 /turf/open/gm/river/darkred_pool
 	color = "#990000"
@@ -763,6 +766,7 @@
 /turf/open/gm/river/shallow_ocean_shallow_ocean
 	name = "shallow ocean"
 	default_name = "shallow ocean"
+	allow_construction = FALSE
 
 /turf/open/gm/river/ocean
 	color = "#dae3e2"
@@ -771,6 +775,7 @@
 /turf/open/gm/river/ocean/deep_ocean
 	name = "deep ocean"
 	default_name = "deep ocean"
+	allow_construction = FALSE
 
 /turf/open/gm/river/ocean/Entered(atom/movable/AM)
 	. = ..()
@@ -778,7 +783,7 @@
 		if(!ismob(AM))
 			return
 		var/mob/unlucky_mob = AM
-		var/turf/target_turf = get_random_turf_in_range(AM.loc, 3, 0)
+		var/turf/target_turf = get_random_turf_in_range(AM, 3, 0)
 		var/datum/launch_metadata/LM = new()
 		LM.target = target_turf
 		LM.range = get_dist(AM.loc, target_turf)
@@ -794,13 +799,15 @@
 	if(world.time % 5)
 		if(ismob(AM))
 			var/mob/rivermob = AM
-			to_chat(rivermob, SPAN_WARNING("Moving through the incredibly deep ocean slows you down a lot!"))
+			if(!HAS_TRAIT(rivermob, TRAIT_HAULED))
+				to_chat(rivermob, SPAN_WARNING("Moving through the incredibly deep ocean slows you down a lot!"))
 
 /turf/open/gm/coast
 	name = "coastline"
 	icon_state = "beach"
 	baseturfs = /turf/open/gm/coast
 	supports_surgery = FALSE
+	is_weedable = NOT_WEEDABLE
 
 /turf/open/gm/coast/north
 
@@ -833,6 +840,9 @@
 /turf/open/gm/coast/beachcorner2
 	icon_state = "beachcorner2"
 
+/turf/open/gm/coast/beachcorner2/east
+	dir = EAST
+
 /turf/open/gm/coast/beachcorner2/north_west
 
 /turf/open/gm/coast/beachcorner2/north_east
@@ -852,6 +862,7 @@
 	supports_surgery = FALSE
 	minimap_color = MINIMAP_WATER
 	is_groundmap_turf = FALSE // Not real ground
+	fishing_allowed = TRUE
 
 
 /turf/open/gm/riverdeep/Initialize(mapload, ...)
@@ -862,7 +873,8 @@
 	no_overlay = TRUE
 	supports_surgery = FALSE
 
-
+/turf/open/gm/river/no_overlay/sewage
+	name = "sewage"
 
 
 //ELEVATOR SHAFT-----------------------------------//
@@ -872,11 +884,7 @@
 	icon_state = "black"
 	density = TRUE
 	supports_surgery = FALSE
-
-/turf/open/gm/empty/is_weedable()
-	return NOT_WEEDABLE
-
-
+	is_weedable = NOT_WEEDABLE
 
 //Nostromo turfs
 
@@ -903,10 +911,8 @@
 	. = ..()
 	setDir(pick(NORTH,SOUTH,EAST,WEST,NORTHEAST,NORTHWEST,SOUTHEAST,SOUTHWEST))
 
-/turf/open/ice/noweed/is_weedable() //used for new prison ice block xenos
-	return NOT_WEEDABLE
-
-
+/turf/open/ice/noweed //used for new prison ice block xenos
+	is_weedable = NOT_WEEDABLE
 
 // Colony tiles
 /turf/open/asphalt
@@ -1019,6 +1025,7 @@
 	icon_state = "grass1"
 	var/icon_spawn_state = "grass1"
 	baseturfs = /turf/open/jungle
+	is_weedable = NOT_WEEDABLE
 
 /turf/open/jungle/Initialize(mapload, ...)
 	. = ..()
@@ -1195,6 +1202,13 @@
 /turf/open/shuttle/bright_red
 	icon_state = "floor4"
 
+/turf/open/shuttle/bright_red/glow
+	icon_state = "floor4"
+	light_on = TRUE
+	light_power = 2
+	light_range = 3
+	light_color = "#ff0000"
+
 /turf/open/shuttle/red
 	icon_state = "floor6"
 
@@ -1240,6 +1254,9 @@
 
 /turf/open/shuttle/dropship/light_grey_middle
 	icon_state = "rasputin13"
+
+/turf/open/shuttle/dropship/medium_grey_single_wide_left_to_right
+	icon_state = "rasputin14"
 
 /turf/open/shuttle/dropship/can_surgery
 	icon_state = "rasputin1"
@@ -1403,6 +1420,12 @@
 	name = "floor"
 	icon_state = "dark_sterile"
 	supports_surgery = TRUE
+
+/turf/open/shuttle/vehicle/med/slate
+	color = "#495462"
+
+/turf/open/shuttle/vehicle/med/gray
+	color = "#9c9a97"
 
 /turf/open/shuttle/vehicle/dark_sterile
 	icon_state = "dark_sterile"

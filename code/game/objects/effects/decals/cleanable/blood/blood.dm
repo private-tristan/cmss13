@@ -31,7 +31,7 @@
 		basecolor = b_color
 	update_icon()
 
-	if(SSticker.mode && MODE_HAS_TOGGLEABLE_FLAG(MODE_BLOOD_OPTIMIZATION))
+	if(MODE_HAS_MODIFIER(/datum/gamemode_modifier/blood_optimization))
 		amount = 0
 		return
 
@@ -46,10 +46,10 @@
 	. = ..()
 	// Check if the blood is dry and only humans
 	// can make footprints
-	if(!amount || !ishuman(AM))
+	if(!amount || !ishuman(AM) || QDELETED(AM))
 		return
 
-	if(SSticker.mode && MODE_HAS_TOGGLEABLE_FLAG(MODE_BLOOD_OPTIMIZATION))
+	if(MODE_HAS_MODIFIER(/datum/gamemode_modifier/blood_optimization))
 		return
 
 	var/mob/living/carbon/human/H = AM
@@ -129,7 +129,7 @@
 	gender = PLURAL
 	density = FALSE
 	anchored = TRUE
-	layer = TURF_LAYER
+	layer = ABOVE_WEED_LAYER
 	icon = 'icons/effects/blood.dmi'
 	icon_state = ""
 	random_icon_states = list("gib1", "gib2", "gib3", "gib4", "gib5", "gib6")

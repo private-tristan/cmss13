@@ -10,7 +10,17 @@
 		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/weapons/guns/revolvers_lefthand.dmi',
 		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/weapons/guns/revolvers_righthand.dmi'
 	)
+	mouse_pointer = 'icons/effects/mouse_pointer/pistol_mouse.dmi'
+
 	matter = list("metal" = 2000)
+	flags_gun_features = GUN_CAN_POINTBLANK|GUN_INTERNAL_MAG|GUN_ONE_HAND_WIELDED
+	gun_category = GUN_CATEGORY_HANDGUN
+	wield_delay = WIELD_DELAY_VERY_FAST //If you modify your revolver to be two-handed, it will still be fast to aim
+	movement_onehanded_acc_penalty_mult = 3
+	has_empty_icon = FALSE
+	has_open_icon = TRUE
+	current_mag = /obj/item/ammo_magazine/internal/revolver
+
 	fire_sound = 'sound/weapons/gun_44mag_v4.ogg'
 	reload_sound = 'sound/weapons/gun_44mag_speed_loader.wav'
 	cocked_sound = 'sound/weapons/gun_revolver_spun.ogg'
@@ -19,17 +29,11 @@
 	var/hand_reload_sound = 'sound/weapons/gun_revolver_load3.ogg'
 	var/spin_sound = 'sound/effects/spin.ogg'
 	var/thud_sound = 'sound/effects/thud.ogg'
-	var/trick_delay = 4 SECONDS
 	var/list/cylinder_click = list('sound/weapons/gun_empty.ogg')
+
+	var/trick_delay = 4 SECONDS
 	var/recent_trick //So they're not spamming tricks.
 	var/russian_roulette = 0 //God help you if you do this.
-	flags_gun_features = GUN_CAN_POINTBLANK|GUN_INTERNAL_MAG|GUN_ONE_HAND_WIELDED
-	gun_category = GUN_CATEGORY_HANDGUN
-	wield_delay = WIELD_DELAY_VERY_FAST //If you modify your revolver to be two-handed, it will still be fast to aim
-	movement_onehanded_acc_penalty_mult = 3
-	has_empty_icon = FALSE
-	has_open_icon = TRUE
-	current_mag = /obj/item/ammo_magazine/internal/revolver
 
 /obj/item/weapon/gun/revolver/Initialize(mapload, spawn_empty)
 	. = ..()
@@ -100,7 +104,8 @@
 		return 1
 
 /obj/item/weapon/gun/revolver/reload(mob/user, obj/item/ammo_magazine/magazine)
-	if(flags_gun_features & GUN_BURST_FIRING) return
+	if(flags_gun_features & GUN_BURST_FIRING)
+		return
 
 	if(!magazine || !istype(magazine))
 		to_chat(user, SPAN_WARNING("That's not gonna work!"))
@@ -141,7 +146,8 @@
 				to_chat(user, SPAN_WARNING("\The [magazine] doesn't fit!"))
 
 /obj/item/weapon/gun/revolver/unload(mob/user)
-	if(flags_gun_features & GUN_BURST_FIRING) return
+	if(flags_gun_features & GUN_BURST_FIRING)
+		return
 
 	if(current_mag)
 		if(current_mag.chamber_closed) //If it's actually closed.
@@ -168,7 +174,6 @@
 	if(current_mag)
 		if(current_mag.current_rounds > 0)
 			if(current_mag.chamber_contents[current_mag.chamber_position] == "bullet")
-				current_mag.current_rounds-- //Subtract the round from the mag.
 				in_chamber = create_bullet(ammo, initial(name))
 				apply_traits(in_chamber)
 				return in_chamber
@@ -183,6 +188,8 @@
 /obj/item/weapon/gun/revolver/reload_into_chamber(mob/user)
 	in_chamber = null
 	if(current_mag)
+		if(current_mag.current_rounds > 0)
+			current_mag.current_rounds-- // Subtract the round from the mag only after firing is confirmed
 		current_mag.chamber_contents[current_mag.chamber_position] = "blank" //We shot the bullet.
 		rotate_cylinder()
 		return 1
@@ -208,7 +215,8 @@
 
 	animation_wrist_flick(src, direction)
 	sleep(3)
-	if(loc && user) playsound(user, thud_sound, 25, 1)
+	if(loc && user)
+		playsound(user, thud_sound, 25, 1)
 
 /obj/item/weapon/gun/revolver/proc/revolver_throw_catch(mob/living/carbon/human/user)
 	set waitfor = 0
@@ -216,8 +224,10 @@
 	var/img_layer = MOB_LAYER+0.1
 	var/image/trick = image(icon,user,icon_state,img_layer)
 	switch(pick(1,2))
-		if(1) animation_toss_snatch(trick)
-		if(2) animation_toss_flick(trick, pick(1,-1))
+		if(1)
+			animation_toss_snatch(trick)
+		if(2)
+			animation_toss_flick(trick, pick(1,-1))
 
 	invisibility = 100
 	var/list/client/displayed_for = list()
@@ -247,8 +257,10 @@
 			user.update_inv_r_hand()
 
 /obj/item/weapon/gun/revolver/proc/revolver_trick(mob/living/carbon/human/user)
-	if(world.time < (recent_trick + trick_delay) ) return //Don't spam it.
-	if(!istype(user)) return //Not human.
+	if(world.time < (recent_trick + trick_delay) )
+		return //Don't spam it.
+	if(!istype(user))
+		return //Not human.
 	var/chance = -5
 	chance = user.health < 6 ? 0 : user.health - 5
 
@@ -304,6 +316,16 @@
 	attachable_allowed = list(
 		/obj/item/attachable/bayonet,
 		/obj/item/attachable/bayonet/upp,
+		/obj/item/attachable/bayonet/wy,
+		/obj/item/attachable/bayonet/antique,
+		/obj/item/attachable/bayonet/custom,
+		/obj/item/attachable/bayonet/custom/red,
+		/obj/item/attachable/bayonet/custom/blue,
+		/obj/item/attachable/bayonet/custom/black,
+		/obj/item/attachable/bayonet/tanto,
+		/obj/item/attachable/bayonet/tanto/blue,
+		/obj/item/attachable/bayonet/rmc_replica,
+		/obj/item/attachable/bayonet/rmc,
 		/obj/item/attachable/reddot,
 		/obj/item/attachable/reflex,
 		/obj/item/attachable/flashlight,
@@ -314,7 +336,7 @@
 		/obj/item/attachable/scope,
 		/obj/item/attachable/lasersight,
 		/obj/item/attachable/scope/mini,
-		/obj/item/attachable/scope/mini_iff,
+		/obj/item/attachable/alt_iff_scope,
 	)
 	var/folded = FALSE // Used for the stock attachment, to check if we can shoot or not
 
@@ -395,7 +417,7 @@
 		/obj/item/attachable/reflex,
 		/obj/item/attachable/scope,
 		/obj/item/attachable/scope/mini,
-		/obj/item/attachable/scope/mini_iff,
+		/obj/item/attachable/alt_iff_scope,
 	)
 
 /obj/item/weapon/gun/revolver/m44/custom/pkd_special/k2049/set_gun_attachment_offsets()
@@ -415,7 +437,7 @@
 /obj/item/weapon/gun/revolver/m44/custom/pkd_special/l_series/set_gun_attachment_offsets()
 	attachable_offset = list("muzzle_x" = 29, "muzzle_y" = 22,"rail_x" = 11, "rail_y" = 25, "under_x" = 20, "under_y" = 18, "stock_x" = 20, "stock_y" = 18)
 
-/obj/item/weapon/gun/revolver/m44/custom/pkd_special/set_gun_config_values()
+/obj/item/weapon/gun/revolver/m44/custom/pkd_special/l_series/set_gun_config_values()
 	..()
 	accuracy_mult = BASE_ACCURACY_MULT + HIT_ACCURACY_MULT_TIER_4
 	damage_mult = BASE_BULLET_DAMAGE_MULT + BULLET_DAMAGE_MULT_TIER_2
@@ -424,9 +446,9 @@
 	set_burst_delay(FIRE_DELAY_TIER_12)
 
 
-/obj/item/weapon/gun/revolver/m44/custom/webley //Van Bandolier's Webley.
-	name = "\improper Webley Mk VI service pistol"
-	desc = "A heavy top-break revolver. Bakelite grips, and older than most nations. .455 was good enough for angry tribesmen and <i>les boche</i>, and by Gum it'll do for Colonial Marines and xenomorphs as well."
+/obj/item/weapon/gun/revolver/m44/custom/webley
+	name = "\improper Webley SRV-80"
+	desc = "A top-break revolver used by the Imperial Armed Space Force’s 24th Para Regiment, and sometimes seen in the hands of other TWE military forces. Fires .455 Magnum. Archaic, yes, but brutally effective. Vacuum-sealed internals, Bakelite-style grips, and a recoil like getting kicked by a mule. Still puts things down. Hard."
 	current_mag = /obj/item/ammo_magazine/internal/revolver/webley
 	icon = 'icons/obj/items/weapons/guns/guns_by_faction/TWE/revolvers.dmi'
 	icon_state = "webley"
@@ -434,6 +456,15 @@
 	attachable_allowed = list(
 		/obj/item/attachable/bayonet,
 		/obj/item/attachable/bayonet/upp,
+		/obj/item/attachable/bayonet/antique,
+		/obj/item/attachable/bayonet/custom,
+		/obj/item/attachable/bayonet/custom/red,
+		/obj/item/attachable/bayonet/custom/blue,
+		/obj/item/attachable/bayonet/custom/black,
+		/obj/item/attachable/bayonet/tanto,
+		/obj/item/attachable/bayonet/tanto/blue,
+		/obj/item/attachable/bayonet/rmc_replica,
+		/obj/item/attachable/bayonet/rmc,
 	)
 
 /obj/item/weapon/gun/revolver/m44/custom/webley/set_gun_config_values()
@@ -441,6 +472,9 @@
 	accuracy_mult = BASE_ACCURACY_MULT + HIT_ACCURACY_MULT_TIER_4
 	damage_mult = BASE_BULLET_DAMAGE_MULT + BULLET_DAMAGE_MULT_TIER_2
 
+/obj/item/weapon/gun/revolver/m44/custom/webley/IASF_webley
+	icon_state = "webley_black"
+	item_state = "m44r"
 
 //-------------------------------------------------------
 //RUSSIAN REVOLVER //Based on the 7.62mm Russian revolvers.
@@ -512,6 +546,10 @@
 /obj/item/weapon/gun/revolver/small/set_gun_attachment_offsets()
 	attachable_offset = list("muzzle_x" = 30, "muzzle_y" = 19,"rail_x" = 12, "rail_y" = 21, "under_x" = 20, "under_y" = 15, "stock_x" = 20, "stock_y" = 15)
 
+/obj/item/weapon/gun/revolver/small/get_examine_text(mob/user)
+	. = ..()
+	. += SPAN_NOTICE("You feel like tricks with it can be done easily.")
+
 /obj/item/weapon/gun/revolver/small/set_gun_config_values()
 	..()
 	set_fire_delay(FIRE_DELAY_TIER_6)
@@ -530,6 +568,11 @@
 		accuracy_mult_unwielded = BASE_ACCURACY_MULT * 2
 		addtimer(CALLBACK(src, PROC_REF(recalculate_attachment_bonuses)), 3 SECONDS)
 
+/obj/item/weapon/gun/revolver/small/black
+	name = "\improper S&W .38 model 37 Custom revolver"
+	desc = "A Custom, lean .38 made by Smith & Wesson. A timeless classic, from antiquity to the future. This specific model, with its sleek black body and custom ivory grips, is known to be wildly inaccurate, yet extremely lethal."
+	icon_state = "black_sw357"
+	item_state = "black_sw357"
 
 //-------------------------------------------------------
 //BURST REVOLVER //Mateba is pretty well known. The cylinder folds up instead of to the side.
@@ -569,6 +612,7 @@
 	)
 	starting_attachment_types = list(/obj/item/attachable/mateba)
 	unacidable = TRUE
+	explo_proof = TRUE
 	black_market_value = 100
 	var/is_locked = TRUE
 	var/can_change_barrel = TRUE
@@ -601,9 +645,12 @@
 			return
 	. = ..()
 
+/obj/item/weapon/gun/revolver/mateba/unique_action(mob/user)
+	if(fire_into_air(user))
+		return ..()
 
 /obj/item/weapon/gun/revolver/mateba/set_gun_attachment_offsets()
-	attachable_offset = list("muzzle_x" = 25, "muzzle_y" = 20,"rail_x" = 11, "rail_y" = 24, "under_x" = 19, "under_y" = 17, "stock_x" = 19, "stock_y" = 17, "special_x" = 23, "special_y" = 22)
+	attachable_offset = list("muzzle_x" = 28, "muzzle_y" = 21, "rail_x" = 9, "rail_y" = 25, "under_x" = 19, "under_y" = 17, "stock_x" = 19, "stock_y" = 17, "special_x" = 23, "special_y" = 22)
 
 /obj/item/weapon/gun/revolver/mateba/set_gun_config_values()
 	..()
@@ -664,6 +711,10 @@
 	icon_state = "aamateba"
 	item_state = "aamateba"
 	current_mag = /obj/item/ammo_magazine/internal/revolver/mateba/impact
+
+/obj/item/weapon/gun/revolver/mateba/engraved/tactical
+	current_mag = /obj/item/ammo_magazine/internal/revolver/mateba
+	starting_attachment_types = list(/obj/item/attachable/mateba, /obj/item/attachable/compensator, /obj/item/attachable/reflex)
 
 /obj/item/weapon/gun/revolver/mateba/cmateba
 	name = "\improper Mateba autorevolver custom"
@@ -736,7 +787,7 @@
 	return ..()
 
 /obj/item/weapon/gun/revolver/cmb/set_gun_attachment_offsets()
-	attachable_offset = list("muzzle_x" = 29, "muzzle_y" = 22,"rail_x" = 11, "rail_y" = 25, "under_x" = 20, "under_y" = 18, "stock_x" = 20, "stock_y" = 18)
+	attachable_offset = list("muzzle_x" = 29, "muzzle_y" = 19, "rail_x" = 11, "rail_y" = 23, "under_x" = 22, "under_y" = 16, "stock_x" = 20, "stock_y" = 18)
 
 /obj/item/weapon/gun/revolver/cmb/set_gun_config_values()
 	..()
@@ -749,5 +800,30 @@
 	recoil = RECOIL_AMOUNT_TIER_5
 	recoil_unwielded = RECOIL_AMOUNT_TIER_3
 
+/obj/item/weapon/gun/revolver/cmb/tactical
+	starting_attachment_types = list(/obj/item/attachable/extended_barrel, /obj/item/attachable/lasersight, /obj/item/attachable/reflex)
+
 /obj/item/weapon/gun/revolver/cmb/normalpoint
 	current_mag = /obj/item/ammo_magazine/internal/revolver/cmb
+
+/obj/item/weapon/gun/revolver/cmb/custom
+	name = "\improper Spearhead custom autorevolver"
+	desc = "An automatic revolver chambered in .357, custom made of darker metal and with a wooden handle, clearly made for a person with taste in mind."
+	icon_state = "black_spearhead"
+	item_state = "black_spearhead"
+	current_mag = /obj/item/ammo_magazine/internal/revolver/cmb
+
+/obj/item/weapon/gun/revolver/cmb/custom/get_examine_text(mob/user)
+	. = ..()
+	. += SPAN_NOTICE("You feel like tricks with it can be done easily.")
+
+/obj/item/weapon/gun/revolver/cmb/custom/unique_action(mob/user)
+	var/result = revolver_trick(user)
+	if(result)
+		to_chat(user, SPAN_NOTICE("Your badass trick inspires you. Your next few shots will be focused!"))
+		accuracy_mult = BASE_ACCURACY_MULT * 2
+		accuracy_mult_unwielded = BASE_ACCURACY_MULT * 2
+		addtimer(CALLBACK(src, PROC_REF(recalculate_attachment_bonuses)), 3 SECONDS)
+
+/obj/item/weapon/gun/revolver/cmb/custom/tactical
+	starting_attachment_types = list(/obj/item/attachable/extended_barrel, /obj/item/attachable/lasersight, /obj/item/attachable/reflex)

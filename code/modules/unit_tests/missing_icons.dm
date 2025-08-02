@@ -159,7 +159,10 @@
 					for(var/obj/item/weapon/gun/guntype as anything in guntypes)
 						if(isnull(initial(guntype.icon_state)))
 							continue
-						check(obj_path, 'icons/obj/items/clothing/belts/holstered_guns.dmi', prefix + initial(guntype.icon_state), guntype, "gun_underlay")
+						if(!guntype.map_specific_decoration)
+							check(obj_path, 'icons/obj/items/clothing/belts/holstered_guns.dmi', initial(guntype.icon_state), guntype, "gun_underlay")
+						else
+							check(obj_path, 'icons/obj/items/clothing/belts/holstered_guns.dmi', prefix + initial(guntype.icon_state), guntype, "gun_underlay")
 		qdel(spawned)
 
 
@@ -171,14 +174,14 @@
 		// Open floor specific checks:
 		if(istype(spawned, /turf/open/floor))
 			var/turf/open/floor/floor = spawned
-			if(floor.breakable_tile && !floor.hull_floor)
+			if(floor.turf_flags & TURF_BURNABLE && !(floor.turf_flags & TURF_HULL))
 				floor.break_tile()
 				check_atom(turf_path, spawned, "This icon_state is needed for break_tile()")
-				floor.broken = FALSE
-			if(floor.burnable_tile && !floor.hull_floor)
+				floor.turf_flags &= ~TURF_BROKEN
+			if(floor.turf_flags & TURF_BURNABLE && !(floor.turf_flags & TURF_HULL))
 				floor.burn_tile()
 				check_atom(turf_path, spawned, "This icon_state is needed for burn_tile()")
-				floor.burnt = FALSE
+				floor.turf_flags &= ~TURF_BURNT
 
 		spawn_at.ChangeTurf(original_turf_type, original_baseturfs)
 		if(original_baseturf_count != length(spawn_at.baseturfs))

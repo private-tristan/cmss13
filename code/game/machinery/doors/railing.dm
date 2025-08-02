@@ -69,7 +69,7 @@
 	addtimer(CALLBACK(src, PROC_REF(finish_close)), 1.2 SECONDS, TIMER_UNIQUE|TIMER_OVERRIDE|TIMER_NO_HASH_WAIT)
 	return TRUE
 
-/obj/structure/machinery/door/poddoor/finish_close()
+/obj/structure/machinery/door/poddoor/railing/finish_close()
 	if(operating != DOOR_OPERATING_CLOSING)
 		return
 
@@ -77,3 +77,6 @@
 
 /obj/structure/machinery/door/poddoor/railing/open
 	density = FALSE
+
+/obj/structure/machinery/door/poddoor/railing/upp
+	id = "supply_elevator_railing_upp"

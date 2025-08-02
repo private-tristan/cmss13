@@ -46,16 +46,25 @@
 	return ..()
 
 /obj/structure/mineral_door/proc/TryToSwitchState(atom/user)
-	if(isSwitchingStates) return
-	if(ismob(user))
-		var/mob/M = user
-		if(M.client)
-			if(iscarbon(M))
-				var/mob/living/carbon/C = M
-				if(!C.handcuffed)
-					SwitchState()
-			else
-				SwitchState()
+	if(isSwitchingStates)
+		return FALSE
+	if(!ismob(user))
+		return FALSE
+
+	var/mob/user_mob = user
+	if(!user_mob.client)
+		return FALSE
+
+	if(iscarbon(user_mob))
+		var/mob/living/carbon/user_carbon = user_mob
+		if(!user_carbon.handcuffed)
+			SwitchState()
+			return TRUE
+	else
+		SwitchState()
+		return TRUE
+
+	return FALSE
 
 /obj/structure/mineral_door/proc/SwitchState()
 	if(open)
@@ -162,18 +171,22 @@
 	hardness = 3
 
 /obj/structure/mineral_door/silver
+	icon_state = "silver"
 	mineralType = "silver"
 	hardness = 3
 
 /obj/structure/mineral_door/gold
+	icon_state = "gold"
 	mineralType = "gold"
 
 /obj/structure/mineral_door/uranium
+	icon_state = "uranium"
 	mineralType = "uranium"
 	hardness = 3
 	light_range = 2
 
 /obj/structure/mineral_door/sandstone
+	icon_state = "sandstone"
 	mineralType = "sandstone"
 	hardness = 0.5
 
@@ -185,6 +198,7 @@
 	opacity = FALSE
 
 /obj/structure/mineral_door/transparent/phoron
+	icon_state = "phoron"
 	mineralType = "phoron"
 
 /obj/structure/mineral_door/transparent/phoron/attackby(obj/item/W as obj, mob/user as mob)
@@ -192,7 +206,7 @@
 		var/obj/item/tool/weldingtool/WT = W
 		if(WT.remove_fuel(0, user))
 			TemperatureAct(100)
-	..()
+	. = ..()
 
 /obj/structure/mineral_door/transparent/phoron/fire_act(exposed_temperature, exposed_volume)
 	if(exposed_temperature > 300)
@@ -202,10 +216,12 @@
 
 
 /obj/structure/mineral_door/transparent/diamond
+	icon_state = "diamond"
 	mineralType = "diamond"
 	hardness = 10
 
 /obj/structure/mineral_door/wood
+	icon_state = "wood"
 	mineralType = "wood"
 	hardness = 1
 

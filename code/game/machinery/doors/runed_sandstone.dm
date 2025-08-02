@@ -4,7 +4,7 @@
 	mineral = "runed sandstone"
 	no_panel = TRUE
 	not_weldable = TRUE
-	use_power = FALSE
+	use_power = USE_POWER_NONE
 	autoclose = FALSE
 	locked = TRUE
 	icon_state = "door_locked"
@@ -251,3 +251,6 @@
 	name = "\improper Runed Sandstone Airlock"
 	unacidable = FALSE //Destroyable version of the temple doors
 	damage_cap = HEALTH_WALL
+
+/obj/structure/machinery/door/airlock/sandstone/runed/dark
+	color = "#2E1E21"

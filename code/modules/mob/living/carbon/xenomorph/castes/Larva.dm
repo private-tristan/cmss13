@@ -54,6 +54,7 @@
 	var/state_override
 	/// Whether we're bloody, normal, or mature
 	var/larva_state = LARVA_STATE_BLOODY
+	var/last_roar_time = 0
 
 	icon_xeno = 'icons/mob/xenos/castes/tier_0/larva.dmi'
 	icon_xenonid = 'icons/mob/xenonids/castes/tier_0/larva.dmi'
@@ -121,7 +122,7 @@
 	hud_set_hunter()
 
 /mob/living/carbon/xenomorph/larva/evolve_message()
-	to_chat(src, SPAN_XENODANGER("Strength ripples through your small form. You are ready to be shaped to the Queen's will. <a href='?src=\ref[src];evolve=1;'>Evolve</a>"))
+	to_chat(src, SPAN_XENODANGER("Strength ripples through your small form. You are ready to be shaped to the Queen's will. <a href='byond://?src=\ref[src];evolve=1;'>Evolve</a>"))
 	playsound_client(client, sound('sound/effects/xeno_evolveready.ogg'))
 
 	var/datum/action/xeno_action/onclick/evolve/evolve_action = new()
@@ -197,6 +198,12 @@
 			return FALSE
 
 	// Otherwise, ""roar""!
+	var/current_time = world.time
+	if(current_time - last_roar_time < 1 SECONDS)
+		to_chat(src, SPAN_WARNING("You must wait before roaring again."))
+		return FALSE
+
+	last_roar_time = current_time
 	playsound(loc, "alien_roar_larva", 15)
 	return TRUE
 

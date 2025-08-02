@@ -11,6 +11,8 @@
 		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/weapons/guns/pistols_lefthand.dmi',
 		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/weapons/guns/pistols_righthand.dmi'
 	)
+	mouse_pointer = 'icons/effects/mouse_pointer/pistol_mouse.dmi'
+
 	matter = list("metal" = 2000)
 	flags_equip_slot = SLOT_WAIST
 	w_class = SIZE_MEDIUM
@@ -41,7 +43,6 @@
 
 /obj/item/weapon/gun/pistol/unique_action(mob/user)
 		cock(user)
-
 
 /obj/item/weapon/gun/pistol/set_gun_config_values()
 	..()
@@ -88,6 +89,8 @@
 /obj/item/weapon/gun/pistol/m4a3/training
 	current_mag = /obj/item/ammo_magazine/pistol/rubber
 
+/obj/item/weapon/gun/pistol/m4a3/tactical
+	starting_attachment_types = list(/obj/item/attachable/suppressor, /obj/item/attachable/reflex, /obj/item/attachable/lasersight)
 
 /obj/item/weapon/gun/pistol/m4a3/custom
 	name = "\improper M4A3 custom pistol"
@@ -241,6 +244,8 @@
 	item_state = "c_deagle"
 	current_mag = /obj/item/ammo_magazine/pistol/heavy/super/highimpact
 	black_market_value = 100
+	unacidable = TRUE
+	explo_proof = TRUE
 
 /obj/item/weapon/gun/pistol/heavy/co/set_gun_config_values()
 	..()
@@ -253,6 +258,10 @@
 	damage_mult = BASE_BULLET_DAMAGE_MULT + BULLET_DAMAGE_MULT_TIER_8
 	recoil = RECOIL_AMOUNT_TIER_3
 	recoil_unwielded = RECOIL_AMOUNT_TIER_2
+
+/obj/item/weapon/gun/pistol/heavy/co/unique_action(mob/user)
+	if(fire_into_air(user))
+		return ..()
 
 /obj/item/weapon/gun/pistol/heavy/co/gold
 	name = "golden vintage Desert Eagle"
@@ -411,30 +420,28 @@
 
 
 //-------------------------------------------------------
-//PIZZACHIMP PROTECTION
+//W62 'Whisper' //.22 plinker made by Spearhead Armory
 
 /obj/item/weapon/gun/pistol/holdout
-	name = "holdout pistol"
-	desc = "A tiny pistol meant for hiding in hard-to-reach areas. Best not ask where it came from."
+	name = "W62 'Whisper' pistol"
+	desc = "A small plinker in .22LR made by Spearhead. Designed for target shooting or quietly dealing with interplanetary vermin. Integrally suppressed and has tritium paint on the ironsights as standard."
 	icon = 'icons/obj/items/weapons/guns/guns_by_faction/colony/pistols.dmi'
-	icon_state = "holdout"
-	item_state = "holdout"
-
+	icon_state = "whisper"
+	item_state = "whisper"
 	fire_sound = 'sound/weapons/gun_pistol_holdout.ogg'
 	current_mag = /obj/item/ammo_magazine/pistol/holdout
-	w_class = SIZE_TINY
+	w_class = SIZE_SMALL
 	force = 2
 	attachable_allowed = list(
-		/obj/item/attachable/suppressor,
+		/obj/item/attachable/reddot,
+		/obj/item/attachable/reflex,
 		/obj/item/attachable/flashlight,
-		/obj/item/attachable/heavy_barrel,
 		/obj/item/attachable/lasersight,
-		/obj/item/attachable/burstfire_assembly,
 	)
 
 
 /obj/item/weapon/gun/pistol/holdout/set_gun_attachment_offsets()
-	attachable_offset = list("muzzle_x" = 25, "muzzle_y" = 20,"rail_x" = 12, "rail_y" = 22, "under_x" = 17, "under_y" = 15, "stock_x" = 22, "stock_y" = 17)
+	attachable_offset = list("muzzle_x" = 25, "muzzle_y" = 20,"rail_x" = 6, "rail_y" = 20, "under_x" = 20, "under_y" = 17, "stock_x" = 22, "stock_y" = 17)
 
 /obj/item/weapon/gun/pistol/holdout/set_gun_config_values()
 	..()
@@ -446,11 +453,56 @@
 	scatter_unwielded = SCATTER_AMOUNT_TIER_6
 	damage_mult = BASE_BULLET_DAMAGE_MULT
 
-/obj/item/weapon/gun/pistol/holdout/flashlight/handle_starting_attachment()
+/obj/item/weapon/gun/pistol/holdout/handle_starting_attachment()
 	..()
-	var/obj/item/attachable/flashlight/flashlight = new(src)
-	flashlight.Attach(src)
-	update_attachable(flashlight.slot)
+	var/obj/item/attachable/suppressor/S = new(src)
+	S.hidden = TRUE
+	S.flags_attach_features &= ~ATTACH_REMOVABLE
+	S.Attach(src)
+	update_attachable(S.slot)
+
+/obj/item/weapon/gun/pistol/holdout/custom
+	name = "W62 'Whisper' custom pistol"
+	desc = "A small plinker in .22LR made by Spearhead. Designed for target shooting or quietly dealing with interplanetary vermin. This one is custom fitted with ivory grip plates and a bluesteel finish."
+	icon_state = "whisperc"
+	item_state = "whisperc"
+
+
+//-------------------------------------------------------
+//AC71 'Action' // .380 ACP pocket pistol made by Spearhead Armory
+
+/obj/item/weapon/gun/pistol/action
+	name = "AC71 'Action' holdout pistol"
+	desc = "A .380 ACP pistol made by Spearhead Armory. Often used by the marshals as a backup weapon."
+	icon = 'icons/obj/items/weapons/guns/guns_by_faction/colony/pistols.dmi'
+	icon_state = "action"
+	item_state = "action"
+	fire_sound = 'sound/weapons/gun_pistol_380acp.ogg'
+	current_mag = /obj/item/ammo_magazine/pistol/action
+	w_class = SIZE_TINY
+	force = 4
+	attachable_allowed = list(
+		/obj/item/attachable/reddot,
+		/obj/item/attachable/reflex,
+		/obj/item/attachable/flashlight,
+		/obj/item/attachable/suppressor,
+		/obj/item/attachable/extended_barrel,
+		/obj/item/attachable/heavy_barrel,
+		/obj/item/attachable/compensator,
+	)
+
+/obj/item/weapon/gun/pistol/action/set_gun_config_values()
+	..()
+	set_fire_delay(FIRE_DELAY_TIER_11)
+	accuracy_mult = BASE_ACCURACY_MULT + HIT_ACCURACY_MULT_TIER_5
+	accuracy_mult_unwielded = BASE_ACCURACY_MULT + HIT_ACCURACY_MULT_TIER_5
+	scatter = SCATTER_AMOUNT_TIER_6
+	burst_scatter_mult = SCATTER_AMOUNT_TIER_6
+	scatter_unwielded = SCATTER_AMOUNT_TIER_6
+	damage_mult = BASE_BULLET_DAMAGE_MULT
+
+/obj/item/weapon/gun/pistol/action/set_gun_attachment_offsets()
+	attachable_offset = list("muzzle_x" = 24, "muzzle_y" = 17,"rail_x" = 12, "rail_y" = 18, "under_x" = 17, "under_y" = 14, "stock_x" = 22, "stock_y" = 17)
 
 //-------------------------------------------------------
 //CLF HOLDOUT PISTOL
@@ -503,6 +555,16 @@
 		/obj/item/attachable/bayonet,
 		/obj/item/attachable/bayonet/upp_replica,
 		/obj/item/attachable/bayonet/upp,
+		/obj/item/attachable/bayonet/wy,
+		/obj/item/attachable/bayonet/antique,
+		/obj/item/attachable/bayonet/custom,
+		/obj/item/attachable/bayonet/custom/red,
+		/obj/item/attachable/bayonet/custom/blue,
+		/obj/item/attachable/bayonet/custom/black,
+		/obj/item/attachable/bayonet/tanto,
+		/obj/item/attachable/bayonet/tanto/blue,
+		/obj/item/attachable/bayonet/rmc_replica,
+		/obj/item/attachable/bayonet/rmc,
 		/obj/item/attachable/extended_barrel,
 		/obj/item/attachable/heavy_barrel,
 		/obj/item/attachable/compensator,
@@ -541,7 +603,8 @@
 /obj/item/weapon/gun/pistol/highpower/cock_gun(mob/user, manual = FALSE)
 	if(manual)
 		..()
-	else return
+	else
+		return
 
 /obj/item/weapon/gun/pistol/highpower/reload(mob/user, obj/item/ammo_magazine/magazine)
 	//reset every time its reloaded
@@ -653,7 +716,7 @@
 	unload_sound = 'sound/weapons/gun_88m4_unload.ogg'
 	current_mag = /obj/item/ammo_magazine/pistol/es4
 	force = 8
-	muzzle_flash = "muzzle_flash_blue"
+	muzzle_flash = "muzzle_energy"
 	muzzle_flash_color = COLOR_MUZZLE_BLUE
 	flags_gun_features = GUN_AUTO_EJECTOR|GUN_CAN_POINTBLANK|GUN_ONE_HAND_WIELDED|GUN_AMMO_COUNTER
 	attachable_allowed = list(
@@ -712,7 +775,7 @@
 	update_attachable(VP.slot)
 
 /obj/item/weapon/gun/pistol/vp78/set_gun_attachment_offsets()
-	attachable_offset = list("muzzle_x" = 29, "muzzle_y" = 21,"rail_x" = 10, "rail_y" = 23, "under_x" = 20, "under_y" = 17, "stock_x" = 18, "stock_y" = 14)
+	attachable_offset = list("muzzle_x" = 29, "muzzle_y" = 22,"rail_x" = 10, "rail_y" = 23, "under_x" = 20, "under_y" = 17, "stock_x" = 18, "stock_y" = 14)
 
 
 /obj/item/weapon/gun/pistol/vp78/set_gun_config_values()
@@ -728,6 +791,9 @@
 	damage_mult = BASE_BULLET_DAMAGE_MULT
 	recoil = RECOIL_AMOUNT_TIER_5
 	recoil_unwielded = RECOIL_AMOUNT_TIER_4
+
+/obj/item/weapon/gun/pistol/vp78/whiteout
+	starting_attachment_types = list(/obj/item/attachable/heavy_barrel, /obj/item/attachable/reflex)
 
 
 //-------------------------------------------------------
@@ -876,3 +942,130 @@ It is a modified Beretta 93R, and can fire three-round burst or single fire. Whe
 	accuracy_mult = BASE_ACCURACY_MULT
 	scatter = SCATTER_AMOUNT_TIER_7
 	damage_mult = BASE_BULLET_DAMAGE_MULT + BULLET_DAMAGE_MULT_TIER_2
+
+//-------------------------------------------------------
+/*
+M10 Auto Pistol: A compact machine pistol that sacrifices accuracy for an impressive fire rate, shredding close-range targets with ease.
+With a 40-round magazine, it can keep up sustained fire in tense situations, though its high recoil and low stability make it tricky to control.
+Unlike other pistols, it can be equipped with limited mods (small muzzle, underbarrel laser, magazine, and optics) but has no burst-fire option.
+*/
+
+/obj/item/weapon/gun/pistol/m10
+	name = "\improper M10 auto pistol"
+	desc = "The Armat Battlefield Systems M10 Auto Pistol, a compact, rapid-firing sidearm designed for close-quarters defense. With a 40-round magazine, it emphasizes fire rate over precision, providing effective suppressive fire in short-range engagements."
+	icon = 'icons/obj/items/weapons/guns/guns_by_map/classic/guns_obj.dmi'
+	icon_state = "m10"
+	item_state = "m10"
+	attachable_allowed = list(
+		/obj/item/attachable/reddot, //Rail
+		/obj/item/attachable/reflex,
+		/obj/item/attachable/flashlight,
+		/obj/item/attachable/magnetic_harness,
+		/obj/item/attachable/suppressor, //Muzzle
+		/obj/item/attachable/compensator,
+		/obj/item/attachable/extended_barrel,
+		/obj/item/attachable/heavy_barrel,
+		/obj/item/attachable/lasersight, //Underbarrel
+	)
+	flags_gun_features = GUN_AUTO_EJECTOR|GUN_CAN_POINTBLANK|GUN_ONE_HAND_WIELDED|GUN_AMMO_COUNTER
+	start_automatic = TRUE
+	map_specific_decoration = TRUE
+	fire_sound = 'sound/weapons/gun_m10_auto_pistol.ogg'
+	reload_sound = 'sound/weapons/handling/smg_reload.ogg'
+	unload_sound = 'sound/weapons/handling/smg_unload.ogg'
+
+	current_mag = /obj/item/ammo_magazine/pistol/m10
+
+/obj/item/weapon/gun/pistol/m10/set_gun_attachment_offsets()
+	attachable_offset = list("muzzle_x" = 26, "muzzle_y" = 19,"rail_x" = 11, "rail_y" = 20, "under_x" = 21, "under_y" = 16, "stock_x" = 18, "stock_y" = 14)
+
+/obj/item/weapon/gun/pistol/m10/set_gun_config_values()
+	..()
+	set_burst_amount(0)
+	fa_scatter_peak = FULL_AUTO_SCATTER_PEAK_TIER_5
+	fa_max_scatter = SCATTER_AMOUNT_TIER_3
+	set_fire_delay(FIRE_DELAY_TIER_12)
+	accuracy_mult = BASE_ACCURACY_MULT
+	accuracy_mult_unwielded = BASE_ACCURACY_MULT
+	scatter = SCATTER_AMOUNT_TIER_4
+	scatter_unwielded = SCATTER_AMOUNT_TIER_3
+	damage_mult = BASE_BULLET_DAMAGE_MULT - BULLET_DAMAGE_MULT_TIER_7
+	recoil = RECOIL_AMOUNT_TIER_5
+	recoil_unwielded = RECOIL_AMOUNT_TIER_4
+
+//-------------------------------------------------------
+/*
+
+L54 service pistol
+
+*/
+
+/obj/item/weapon/gun/pistol/l54
+	name = "\improper L54 service pistol"
+	desc = "Standard issue semi-automatic service pistol of the NSPA. Chambered in 9mm, it is comparable to the popular M4A3 pistol utilized by the USCM."
+	icon = 'icons/obj/items/weapons/guns/guns_by_faction/TWE/pistols.dmi'
+	icon_state = "l54"
+	item_state = "l54"
+	fire_sound = 'sound/weapons/gun_vp78_v2.ogg'
+	reload_sound = 'sound/weapons/gun_vp78_reload.ogg'
+	unload_sound = 'sound/weapons/gun_vp78_unload.ogg'
+	current_mag = /obj/item/ammo_magazine/pistol/l54
+	flags_gun_features = GUN_CAN_POINTBLANK|GUN_ONE_HAND_WIELDED
+	attachable_allowed = list(
+		/obj/item/attachable/suppressor,
+		/obj/item/attachable/reddot,
+		/obj/item/attachable/reflex,
+		/obj/item/attachable/flashlight,
+		/obj/item/attachable/compensator,
+		/obj/item/attachable/lasersight,
+		/obj/item/attachable/extended_barrel,
+		/obj/item/attachable/heavy_barrel,
+		/obj/item/attachable/burstfire_assembly,
+	)
+
+/obj/item/weapon/gun/pistol/l54/set_gun_attachment_offsets()
+	attachable_offset = list("muzzle_x" = 28, "muzzle_y" = 20,"rail_x" = 10, "rail_y" = 21, "under_x" = 21, "under_y" = 17, "stock_x" = 21, "stock_y" = 17)
+
+/obj/item/weapon/gun/pistol/l54/set_gun_config_values()
+	..()
+	set_fire_delay(FIRE_DELAY_TIER_12)
+	accuracy_mult = BASE_ACCURACY_MULT + HIT_ACCURACY_MULT_TIER_4
+	accuracy_mult_unwielded = BASE_ACCURACY_MULT
+	scatter = SCATTER_AMOUNT_TIER_6
+	burst_scatter_mult = SCATTER_AMOUNT_TIER_6
+	scatter_unwielded = SCATTER_AMOUNT_TIER_6
+	damage_mult = BASE_BULLET_DAMAGE_MULT
+
+/obj/item/weapon/gun/pistol/l54_custom
+	name = "\improper L54 custom service pistol"
+	desc = "The standard-issue semi-automatic sidearm of the NSPA and various military forces within the Three World Empire, chambered in 9mm. Functionally comparable to the USCM’s M4A3 service pistol, this particular example has been heavily customized—featuring a gold-alloy finish, extended barrel with an integrated compensator, and precision-tuned internals, as well as an auto-eject feature. These modifications push its performance well beyond standard service specifications."
+	icon = 'icons/obj/items/weapons/guns/guns_by_faction/TWE/pistols.dmi'
+	icon_state = "l54_custom"
+	item_state = "l54_custom"
+	current_mag = /obj/item/ammo_magazine/pistol/l54_custom
+	attachable_allowed = list(
+		/obj/item/attachable/reddot,
+		/obj/item/attachable/reflex,
+		/obj/item/attachable/flashlight,
+		/obj/item/attachable/lasersight,
+		/obj/item/attachable/burstfire_assembly,
+	)
+
+/obj/item/weapon/gun/pistol/l54_custom/set_gun_attachment_offsets()
+	attachable_offset = list("muzzle_x" = 30, "muzzle_y" = 20,"rail_x" = 10, "rail_y" = 21, "under_x" = 21, "under_y" = 17, "stock_x" = 21, "stock_y" = 17)
+
+/obj/item/weapon/gun/pistol/l54_custom/set_gun_config_values()
+	..()
+	set_fire_delay(FIRE_DELAY_TIER_12)
+	accuracy_mult = BASE_ACCURACY_MULT + HIT_ACCURACY_MULT_TIER_10
+	accuracy_mult_unwielded = BASE_ACCURACY_MULT
+	scatter = SCATTER_AMOUNT_TIER_6
+	burst_scatter_mult = SCATTER_AMOUNT_TIER_6
+	scatter_unwielded = SCATTER_AMOUNT_TIER_6
+	damage_mult = BASE_BULLET_DAMAGE_MULT + BULLET_DAMAGE_MULT_TIER_5
+	flags_gun_features = GUN_CAN_POINTBLANK|GUN_ONE_HAND_WIELDED|GUN_AUTO_EJECTOR
+
+/obj/item/weapon/gun/pistol/l54_custom/alt
+	desc = "The standard-issue semi-automatic sidearm of the NSPA and various military forces within the Three World Empire, chambered in 9mm. Functionally comparable to the USCM’s M4A3 service pistol, this particular example has been heavily customized—featuring a dark special-alloy finish, extended barrel with an integrated compensator, and precision-tuned internals, as well as an auto-eject feature. These modifications push its performance well beyond standard service specifications."
+	icon_state = "l54_custom_alt"
+	item_state = "l54_custom_alt"

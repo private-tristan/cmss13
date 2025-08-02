@@ -10,13 +10,13 @@
 	max_w_class = SIZE_LARGE
 	storage_slots = 1
 	max_storage_space = 4
-	storage_flags = STORAGE_FLAGS_DEFAULT|STORAGE_USING_DRAWING_METHOD|STORAGE_ALLOW_QUICKDRAW
+	storage_flags = STORAGE_FLAGS_DEFAULT|STORAGE_USING_DRAWING_METHOD|STORAGE_ALLOW_QUICKDRAW|STORAGE_ALLOW_WHILE_HAULED
 	///Icon/item states change based on contents; this stores base icon state.
 	var/base_icon
 	var/drawSound = 'sound/weapons/gun_rifle_draw.ogg'
 	item_icons = list(
 		WEAR_BACK = 'icons/mob/humans/onmob/clothing/back/holster.dmi',
-		WEAR_WAIST = 'icons/mob/humans/onmob/clothing/suit_storage/belts.dmi',
+		WEAR_WAIST = 'icons/mob/humans/onmob/clothing/belts/belts.dmi',
 		WEAR_J_STORE = 'icons/mob/humans/onmob/clothing/suit_storage/belts.dmi',
 		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/items_by_map/jungle_lefthand.dmi',
 		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/items_by_map/jungle_righthand.dmi'
@@ -63,7 +63,7 @@
 		playsound(src, drawSound, 15, TRUE)
 
 /obj/item/storage/large_holster/m37
-	name = "\improper L44 M37A2 scabbard"
+	name = "\improper L44 shotgun scabbard"
 	desc = "A large leather holster fitted for USCM-issue shotguns. It has harnesses that allow it to be secured to the back for easy storage."
 	icon_state = "m37_holster"
 	icon = 'icons/obj/items/clothing/backpack/backpacks_by_map/jungle.dmi'
@@ -75,6 +75,7 @@
 		/obj/item/weapon/gun/shotgun/pump,
 		/obj/item/weapon/gun/shotgun/combat,
 		/obj/item/weapon/gun/shotgun/double/mou53,
+		/obj/item/weapon/gun/shotgun/pump/m37a,
 	)
 	flags_atom = FPRINT // has gamemode skin
 
@@ -108,7 +109,7 @@
 	can_hold = list(/obj/item/weapon/sword/machete)
 	item_icons = list(
 		WEAR_BACK = 'icons/mob/humans/onmob/clothing/back/holster.dmi',
-		WEAR_WAIST = 'icons/mob/humans/onmob/clothing/suit_storage/belts.dmi',
+		WEAR_WAIST = 'icons/mob/humans/onmob/clothing/belts/scabbards.dmi',
 		WEAR_J_STORE = 'icons/mob/humans/onmob/clothing/suit_storage/belts.dmi',
 		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/clothing/belts_lefthand.dmi',
 		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/clothing/belts_righthand.dmi'
@@ -153,6 +154,12 @@
 	name = "\improper katana scabbard"
 	desc = "A large, vibrantly colored katana scabbard used to carry a Japanese sword. It can be strapped to the back or worn at the belt. Because of the sturdy wood casing of the scabbard, it makes an okay defensive weapon in a pinch."
 	icon_state = "katana_holster"
+	item_icons = list(
+		WEAR_BACK = 'icons/mob/humans/onmob/clothing/back/holster.dmi',
+		WEAR_WAIST = 'icons/mob/humans/onmob/clothing/belts/scabbards.dmi',
+		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/clothing/belts_lefthand.dmi',
+		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/clothing/belts_righthand.dmi'
+	)
 	force = 12
 	attack_verb = list("bludgeoned", "struck", "cracked")
 	flags_equip_slot = SLOT_WAIST|SLOT_BACK
@@ -163,8 +170,13 @@
 
 /obj/item/storage/large_holster/ceremonial_sword
 	name = "ceremonial sword scabbard"
-	desc = "A large, vibrantly colored scabbard used to carry a ceremonial sword."
+	desc = "A large, old-styled scabbard used to carry a ceremonial sword."
 	icon_state = "ceremonial_sword_holster"//object icon is duplicate of katana holster, needs new icon at some point.
+	item_icons = list(
+		WEAR_WAIST = 'icons/mob/humans/onmob/clothing/belts/scabbards.dmi',
+		WEAR_L_HAND = 'icons/mob/humans/onmob/inhands/clothing/belts_lefthand.dmi',
+		WEAR_R_HAND = 'icons/mob/humans/onmob/inhands/clothing/belts_righthand.dmi'
+	)
 	force = 12
 	flags_equip_slot = SLOT_WAIST
 	can_hold = list(/obj/item/weapon/sword/ceremonial)
@@ -184,6 +196,7 @@
 		/obj/item/weapon/gun/smg/mp27,
 		/obj/item/weapon/gun/smg/mac15,
 		/obj/item/weapon/gun/pistol/skorpion,
+		/obj/item/weapon/gun/pistol/m10,
 	)
 	///Guns have a hud offset that throws the vis_contents alignment off.
 	var/gun_offset = 0
@@ -233,8 +246,7 @@
 	handle_item_insertion(new /obj/item/weapon/gun/smg/m39())
 
 /obj/item/storage/large_holster/m39/full/elite/fill_preset_inventory()
-	handle_item_insertion(new /obj/item/weapon/gun/smg/m39/elite())
-
+	handle_item_insertion(new /obj/item/weapon/gun/smg/m39/elite/compact())
 
 /obj/item/storage/large_holster/fuelpack
 	name = "\improper Broiler-T flexible refueling system"
@@ -246,11 +258,11 @@
 	var/obj/item/ammo_magazine/flamer_tank/large/B/fuelB
 	var/obj/item/ammo_magazine/flamer_tank/large/X/fuelX
 	var/obj/item/ammo_magazine/flamer_tank/large/active_fuel
-	var/obj/item/weapon/gun/flamer/M240T/linked_flamer
+	var/obj/item/weapon/gun/flamer/m240/spec/linked_flamer
 	var/toggling = FALSE
 	var/image/flamer_overlay
 	actions_types = list(/datum/action/item_action/specialist/toggle_fuel)
-	can_hold = list(/obj/item/weapon/gun/flamer/M240T)
+	can_hold = list(/obj/item/weapon/gun/flamer/m240/spec)
 
 /obj/item/storage/large_holster/fuelpack/Initialize()
 	. = ..()
@@ -275,6 +287,9 @@
 		if("snow")
 			icon = 'icons/obj/items/clothing/backpack/backpacks_by_map/snow.dmi'
 			item_icons[WEAR_BACK] = 'icons/mob/humans/onmob/clothing/back/backpacks_by_map/snow.dmi'
+		if("urban")
+			icon = 'icons/obj/items/clothing/backpack/backpacks_by_map/urban.dmi'
+			item_icons[WEAR_BACK] = 'icons/mob/humans/onmob/clothing/back/backpacks_by_map/urban.dmi'
 
 /obj/item/storage/large_holster/fuelpack/Destroy()
 	QDEL_NULL(active_fuel)
@@ -371,7 +386,7 @@
 		switch_fuel(A, user)
 		return
 
-	var/obj/item/weapon/gun/flamer/M240T/F = A
+	var/obj/item/weapon/gun/flamer/m240/spec/F = A
 	if(istype(F) && !(F.fuelpack))
 		F.link_fuelpack(user)
 		if(F.current_mag && !(F.current_mag in list(fuel,fuelB,fuelX)))
@@ -453,3 +468,35 @@
 	if (!istype(FP))
 		return
 	FP.toggle_fuel()
+
+/obj/item/storage/belt/gun/brutepack
+	name = "\improper M271A2 Pattern Launcher Rig"
+	desc = "A special-issue harness designed to allow the user to freely and securely holster a M6H-BRUTE launcher system on their back without impeding movement, while also having several other integrated storage packs for additional ammo and equipment."
+	icon = 'icons/obj/items/clothing/backpack/backpacks_by_faction/UA.dmi'
+	icon_state = "bruterig"
+	map_specific_decoration = FALSE
+	item_icons = list(
+		WEAR_BACK = 'icons/mob/humans/onmob/clothing/back/backpacks_by_faction/UA.dmi'
+	)
+	flags_equip_slot = SLOT_BACK //yes we are belt subtype that is worn on back
+	storage_slots = 7
+	max_w_class = SIZE_MEDIUM
+	can_hold = list(
+		/obj/item/ammo_magazine,
+		/obj/item/weapon/gun/launcher/rocket/brute,
+	)
+	bypass_w_limit = list(/obj/item/weapon/gun/launcher/rocket/brute)
+
+
+/obj/item/storage/belt/gun/brutepack/update_icon()
+	. = ..()
+	var/mob/living/carbon/human/user = loc
+	if(istype(user))
+		user.update_inv_back()
+
+/obj/item/storage/belt/gun/brutepack/full/fill_preset_inventory()
+	handle_item_insertion(new /obj/item/weapon/gun/launcher/rocket/brute())
+	new /obj/item/ammo_magazine/rocket/brute(src)
+	new /obj/item/ammo_magazine/rocket/brute(src)
+	new /obj/item/ammo_magazine/rocket/brute(src)
+
