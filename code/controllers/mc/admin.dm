@@ -1,6 +1,7 @@
 // Clickable stat() button.
 /obj/effect/statclick
 	name = "Initializing..."
+	blocks_emissive = EMISSIVE_BLOCK_NONE
 	var/target
 
 INITIALIZE_IMMEDIATE(/obj/effect/statclick)
@@ -23,6 +24,13 @@ INITIALIZE_IMMEDIATE(/obj/effect/statclick)
 /obj/effect/statclick/proc/update(text)
 	name = text
 	return src
+
+/obj/effect/statclick/Topic(href, href_list)
+	if(usr.client && usr.client.admin_holder)
+		Action(href_list["action"])
+
+/obj/effect/statclick/proc/Action(action)
+	return
 
 /obj/effect/statclick/debug
 	var/class
